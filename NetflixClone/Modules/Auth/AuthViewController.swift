@@ -78,12 +78,15 @@ final class AuthViewController: UIViewController {
     }
     
     private func setupConstraints() {
+        let contentViewHeightConstraint = contentView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
+        contentViewHeightConstraint.priority = .defaultLow // Allows expanding when content or keyboard forces it taller
+        
         NSLayoutConstraint.activate([
             // ScrollView fills safe area
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor),
             
             // ContentView pins to contentLayoutGuide (defines scroll content size)
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
@@ -93,7 +96,7 @@ final class AuthViewController: UIViewController {
             
             // ContentView matches frameLayoutGuide height (minimum screen height) and width
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            contentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.frameLayoutGuide.heightAnchor),
+            contentViewHeightConstraint,
             
             // StackView centered inside ContentView
             stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
