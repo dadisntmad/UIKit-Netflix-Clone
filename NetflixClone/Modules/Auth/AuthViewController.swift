@@ -28,22 +28,26 @@ final class AuthViewController: UIViewController {
         return btn
     }()
     
+    private lazy var stackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [usernameTextField, passwordTextField, signInButton])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.spacing = AppConstants.spacing
+        return stack
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .secondaryBackground
-        navigationItem.titleView = logoView
-        setupLogoConstraints()
-        configureNavigationBar()
-        setupTextFieldsContraints()
-        setupButtonConstraints()
+        setupUI()
+        setupConstraints()
     }
     
-    private func setupLogoConstraints() {
-        NSLayoutConstraint.activate([
-            logoView.widthAnchor.constraint(equalToConstant: Constants.logoWidth),
-            logoView.heightAnchor.constraint(equalToConstant: Constants.logoHeight)
-        ])
+    private func setupUI() {
+        view.backgroundColor = .secondaryBackground
+        navigationItem.titleView = logoView
+        configureNavigationBar()
+        view.addSubview(stackView)
     }
     
     private func configureNavigationBar() {
@@ -58,33 +62,21 @@ final class AuthViewController: UIViewController {
         navigationController?.navigationBar.compactAppearance = appearance
     }
     
-    private func setupTextFieldsContraints() {
-        [usernameTextField, passwordTextField].forEach { item in
-            view.addSubview(item)
-        }
-        
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Username text field
-            usernameTextField.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            usernameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.spacing),
-            usernameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.spacing),
+            // Logo Dimensions
+            logoView.widthAnchor.constraint(equalToConstant: Constants.logoWidth),
+            logoView.heightAnchor.constraint(equalToConstant: Constants.logoHeight),
+            
+            // Stack
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: AppConstants.spacing),
+            stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -AppConstants.spacing),
+            
+            // View heights
             usernameTextField.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
-            // Password text field
-            passwordTextField.topAnchor.constraint(equalTo: usernameTextField.bottomAnchor, constant: AppConstants.spacing),
-            passwordTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.spacing),
-            passwordTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.spacing),
             passwordTextField.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
-        ])
-    }
-    
-    private func setupButtonConstraints() {
-        view.addSubview(signInButton)
-        
-        NSLayoutConstraint.activate([
-            signInButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: AppConstants.spacing),
-            signInButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: AppConstants.spacing),
-            signInButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -AppConstants.spacing),
-            signInButton.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
+            signInButton.heightAnchor.constraint(equalToConstant: Constants.fieldHeight)
         ])
     }
 }
