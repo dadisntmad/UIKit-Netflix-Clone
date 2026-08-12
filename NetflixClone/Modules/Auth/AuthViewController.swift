@@ -37,6 +37,19 @@ final class AuthViewController: UIViewController {
         return stack
     }()
     
+    private let scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.showsVerticalScrollIndicator = false
+        return scroll
+    }()
+    
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -47,7 +60,9 @@ final class AuthViewController: UIViewController {
         view.backgroundColor = .secondaryBackground
         navigationItem.titleView = logoView
         configureNavigationBar()
-        view.addSubview(stackView)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(stackView)
     }
     
     private func configureNavigationBar() {
@@ -64,16 +79,34 @@ final class AuthViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Logo Dimensions
+            // ScrollView fills safe area
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            // ContentView pins to contentLayoutGuide (defines scroll content size)
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            
+            // ContentView matches frameLayoutGuide height (minimum screen height) and width
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.frameLayoutGuide.heightAnchor),
+            
+            // StackView centered inside ContentView
+            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppConstants.spacing),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppConstants.spacing),
+            
+            // Top and bottom safety padding so stack content doesn't break out when oversized
+            stackView.topAnchor.constraint(greaterThanOrEqualTo: contentView.topAnchor, constant: AppConstants.spacing),
+            stackView.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -AppConstants.spacing),
+            
+            // Heights
             logoView.widthAnchor.constraint(equalToConstant: Constants.logoWidth),
             logoView.heightAnchor.constraint(equalToConstant: Constants.logoHeight),
-            
-            // Stack
-            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: AppConstants.spacing),
-            stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -AppConstants.spacing),
-            
-            // View heights
             usernameTextField.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
             passwordTextField.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
             signInButton.heightAnchor.constraint(equalToConstant: Constants.fieldHeight)
