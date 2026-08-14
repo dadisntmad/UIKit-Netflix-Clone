@@ -1,9 +1,18 @@
 import UIKit
+import Combine
 
 final class TextField: UITextField {
     private let padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     
-    init(hintText: String, isSecure: Bool = false) {
+    // Custom publisher that emits whenever the user types
+    var textPublisher: AnyPublisher<String, Never> {
+        NotificationCenter.default
+            .publisher(for: UITextField.textDidChangeNotification, object: self)
+            .compactMap { ($0.object as? UITextField)?.text }
+            .eraseToAnyPublisher()
+    }
+    
+    init(hintText: String, isSecure: Bool = false, autocapitalization: UITextAutocapitalizationType = .none) {
         super.init(frame: .zero)
         
         translatesAutoresizingMaskIntoConstraints = false
@@ -11,6 +20,7 @@ final class TextField: UITextField {
         layer.cornerRadius = 8
         backgroundColor = .accentGrey
         isSecureTextEntry = isSecure
+        autocapitalizationType = autocapitalization
     }
     
     required init?(coder: NSCoder) {

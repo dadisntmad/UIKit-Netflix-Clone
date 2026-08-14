@@ -1,6 +1,10 @@
 import UIKit
+import Combine
 
 final class AuthViewController: UIViewController {
+    private let viewModel: AuthViewModel
+    private var cancellables = Set<AnyCancellable>()
+    
     private enum Constants {
         static let fieldHeight: CGFloat = 50
         static let logoWidth: CGFloat = 120
@@ -18,13 +22,16 @@ final class AuthViewController: UIViewController {
     private let usernameTextField = TextField(hintText: "Username")
     private let passwordTextField = TextField(hintText: "Password", isSecure: true)
     
-    private let signInButton: UIButton = {
-        let btn = UIButton()
+    private lazy var signInButton: UIButton = {
+        let btn = UIButton(type: .system, primaryAction: UIAction { [weak self] _ in
+            self?.signIn()
+        })
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.layer.cornerRadius = 8
         btn.setTitle("Sign In", for: .normal)
         btn.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         btn.backgroundColor = .accentRed
+        btn.tintColor = .white
         return btn
     }()
     
@@ -50,10 +57,51 @@ final class AuthViewController: UIViewController {
         return view
     }()
     
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    
+    init(viewModel: AuthViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupConstraints()
+        bindViewModel()
+    }
+    
+    private func bindViewModel() {
+        // Update value in ViewModel during text entering
+        usernameTextField.textPublisher
+            .sink { [weak viewModel] text in
+                viewModel?.username = text
+            }
+            .store(in: &cancellables)
+        
+        passwordTextField.textPublisher
+            .sink { [weak viewModel] text in
+                viewModel?.password = text
+            }
+            .store(in: &cancellables)
+        
+        // Subscribing to ViewModel state changes
+        viewModel.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                if status == .loading {
+                    self?.activityIndicator.startAnimating()
+                    self?.signInButton.isEnabled = false
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                    self?.signInButton.isEnabled = true
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func setupUI() {
@@ -114,6 +162,12 @@ final class AuthViewController: UIViewController {
             passwordTextField.heightAnchor.constraint(equalToConstant: Constants.fieldHeight),
             signInButton.heightAnchor.constraint(equalToConstant: Constants.fieldHeight)
         ])
+    }
+    
+    func signIn() {
+        Task {
+            await viewModel.signIn()
+        }
     }
 }
 
