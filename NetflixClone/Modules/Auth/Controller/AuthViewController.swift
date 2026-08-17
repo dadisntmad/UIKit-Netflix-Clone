@@ -12,7 +12,7 @@ final class AuthViewController: UIViewController {
     }
     
     private let logoView: UIImageView = {
-        let image = UIImage(named: "logo")
+        let image = UIImage(named: Icon.logo)
         let view = UIImageView(image: image)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFit
