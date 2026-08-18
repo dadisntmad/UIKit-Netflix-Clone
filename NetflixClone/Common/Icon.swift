@@ -10,4 +10,5 @@ enum Icon {
     // System
     static let systemPlayFill = "play.fill"
     static let systemPlus = "plus"
+    static let systemTVFill = "4k.tv.fill"
 }
