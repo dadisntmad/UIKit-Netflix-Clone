@@ -6,4 +6,8 @@ enum Icon {
     static let new = "new"
     static let profileImage = "profileImage"
     static let search = "search"
+    
+    // System
+    static let systemPlayFill = "play.fill"
+    static let systemPlus = "plus"
 }
