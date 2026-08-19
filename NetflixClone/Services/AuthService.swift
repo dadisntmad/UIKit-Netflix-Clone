@@ -1,21 +1,5 @@
 import Foundation
 
-enum AuthError: Error, LocalizedError {
-    case invalidUrl
-    case decodingError
-    case httpError(statusCode: Int)
-    case networkError(Error)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidUrl: return "Invalid server endpoint URL."
-        case .decodingError: return "Failed to process response data."
-        case .httpError(let code): return "HTTP Server error code: \(code)."
-        case .networkError(let err): return err.localizedDescription
-        }
-    }
-}
-
 protocol AuthServiceProtocol {
     func signIn(username: String, password: String) async throws -> String
     func signOut(sessionId: String) async throws -> DeleteSessionResponse
@@ -53,7 +37,7 @@ final class AuthService: AuthServiceProtocol {
     
     func signOut(sessionId: String) async throws -> DeleteSessionResponse {
         guard let url = URL(string: "\(baseUrl)/session?api_key=\(apiKey)") else {
-            throw AuthError.invalidUrl
+            throw CustomError.invalidUrl
         }
         
         let body = DeleteSessionRequest(sessionId: sessionId)
@@ -69,7 +53,7 @@ final class AuthService: AuthServiceProtocol {
     // MARK: Helper functions
     private func createToken() async throws -> RequestTokenResponse {
         guard let url = URL(string: "\(baseUrl)/token/new?api_key=\(apiKey)") else {
-            throw AuthError.invalidUrl
+            throw CustomError.invalidUrl
         }
         return try await performRequest(for: URLRequest(url: url))
     }
@@ -80,7 +64,7 @@ final class AuthService: AuthServiceProtocol {
         requestToken: String
     ) async throws -> RequestTokenResponse {
         guard let url = URL(string: "\(baseUrl)/token/validate_with_login?api_key=\(apiKey)") else {
-            throw AuthError.invalidUrl
+            throw CustomError.invalidUrl
         }
         
         let body = SignInRequest(
@@ -99,7 +83,7 @@ final class AuthService: AuthServiceProtocol {
     
     private func createSession(requestToken: String) async throws -> SessionResponse {
         guard let url = URL(string: "\(baseUrl)/session/new?api_key=\(apiKey)") else {
-            throw AuthError.invalidUrl
+            throw CustomError.invalidUrl
         }
         
         var request = URLRequest(url: url)
@@ -118,21 +102,21 @@ final class AuthService: AuthServiceProtocol {
         do {
             (data, res) = try await session.data(for: request)
         } catch {
-            throw AuthError.networkError(error)
+            throw CustomError.networkError(error)
         }
         
         guard let httpRes = res as? HTTPURLResponse else {
-            throw AuthError.networkError(URLError(.badServerResponse))
+            throw CustomError.networkError(URLError(.badServerResponse))
         }
         
         guard (200...299).contains(httpRes.statusCode) else {
-            throw AuthError.httpError(statusCode: httpRes.statusCode)
+            throw CustomError.httpError(statusCode: httpRes.statusCode)
         }
         
         do {
             return try jsonDecoder.decode(T.self, from: data)
         } catch {
-            throw AuthError.decodingError
+            throw CustomError.decodingError
         }
     }
 }

@@ -9,16 +9,19 @@ final class AppCoordinator: Coordinator {
     private let window: UIWindow
     private let authService: AuthServiceProtocol
     private let keychainService: KeychainServiceProtocol
+    private let movieService: MovieServiceProtocol
     
     init(
         window: UIWindow,
         authService: AuthServiceProtocol,
-        keychainService: KeychainServiceProtocol
+        keychainService: KeychainServiceProtocol,
+        movieService: MovieServiceProtocol,
     ) {
         self.window = window
         self.navigationController = UINavigationController()
         self.authService = authService
         self.keychainService = keychainService
+        self.movieService = movieService
     }
     
     func start() {
@@ -57,7 +60,10 @@ final class AppCoordinator: Coordinator {
     }
     
     private func showMain() {
-        let mainCoordinator = MainCoordinator(navigationController: navigationController)
+        let mainCoordinator = MainCoordinator(
+            navigationController: navigationController,
+            movieService: movieService
+        )
         addChild(mainCoordinator)
         mainCoordinator.start()
     }

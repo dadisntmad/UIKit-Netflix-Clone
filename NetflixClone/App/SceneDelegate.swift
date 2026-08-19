@@ -18,7 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let coordinator = AppCoordinator(
             window: window,
             authService: AuthService(),
-            keychainService: KeychainService()
+            keychainService: KeychainService(),
+            movieService: MovieService()
         )
         
         self.appCoordinator = coordinator

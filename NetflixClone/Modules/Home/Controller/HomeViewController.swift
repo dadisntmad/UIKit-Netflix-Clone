@@ -1,13 +1,23 @@
 import UIKit
+import Combine
 
 final class HomeViewController: UIViewController {
-    private let movieTitleList = [
-        "Trending Movies",
-        "Popular",
-        "Trending TV",
-        "Upcoming Movies",
-        "Top Rated",
-    ]
+    enum Sections: Int, CaseIterable {
+        case nowPlaying = 0
+        case popular = 1
+        case topRated = 2
+        
+        var title: String {
+            switch self {
+            case .nowPlaying: return "Now Playing"
+            case .popular: return "Popular"
+            case .topRated: return "Top Rated"
+            }
+        }
+    }
+    
+    private let homeViewModel: HomeViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
@@ -19,6 +29,16 @@ final class HomeViewController: UIViewController {
         return table
     }()
     
+    
+    init(homeViewModel: HomeViewModel) {
+        self.homeViewModel = homeViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -29,11 +49,28 @@ final class HomeViewController: UIViewController {
         tableView.tableHeaderView = HomeHeaderUIView(frame: .init(x: 0, y: 0, width: view.bounds.width, height: 450))
         setupUsername()
         setupActionButtons()
+        bindViewModel()
+        fetchMovies()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         tableView.frame = view.bounds
+    }
+    
+    private func bindViewModel() {
+        homeViewModel.$nowPlayingMovies
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadSections(IndexSet(integer: Sections.nowPlaying.rawValue), with: .automatic)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func fetchMovies() {
+        Task {
+            await homeViewModel.getMovies()
+        }
     }
     
     private func setupUsername() {
@@ -88,13 +125,23 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        movieTitleList.count
+        Sections.allCases.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeCollectionViewTableViewCell.identifier, for: indexPath) as? HomeCollectionViewTableViewCell else {
             return UITableViewCell()
         }
+        
+        guard let sectionType = Sections(rawValue: indexPath.section) else { return cell }
+        
+        switch sectionType {
+        case .nowPlaying:
+            cell.configure(with: homeViewModel.nowPlayingMovies)
+        case .popular, .topRated:
+            cell.configure(with: [])
+        }
+        
         return cell
     }
     
@@ -115,7 +162,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        movieTitleList[section]
+        Sections(rawValue: section)?.title
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
