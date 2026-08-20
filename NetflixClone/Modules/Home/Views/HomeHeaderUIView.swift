@@ -1,18 +1,17 @@
 import UIKit
+import SDWebImage
 
 final class HomeHeaderUIView: UIView {
     private let imageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
-        view.image = UIImage(named: "poster")
         return view
     }()
     
     private let movieLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Movie"
         label.font = .systemFont(ofSize: 28, weight: .semibold)
         return label
     }()
@@ -91,5 +90,14 @@ final class HomeHeaderUIView: UIView {
             buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -32),
             buttonStackView.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+    
+    func configure(with movie: Movie?) {
+        guard let movie else { return }
+        movieLabel.text = movie.title
+        
+        if let url = URL(string: movie.moviePosterPath) {
+            imageView.sd_setImage(with: url, completed: nil)
+        }
     }
 }

@@ -1,14 +1,14 @@
 import Foundation
 
 protocol MovieServiceProtocol {
-    func getMovies() async throws -> MovieResponse
+    func getMovies(for type: MovieType) async throws -> MovieResponse
 }
 
 final class MovieService: MovieServiceProtocol {
     private let baseUrl = "https://api.themoviedb.org/3/movie"
     
-    func getMovies() async throws -> MovieResponse {
-        guard let url = URL(string: "\(baseUrl)/top_rated?api_key=\(AppConfig.shared.apiKey)") else {
+    func getMovies(for type: MovieType) async throws -> MovieResponse {
+        guard let url = URL(string: "\(baseUrl)/\(type.endpoint)?api_key=\(AppConfig.shared.apiKey)") else {
             throw CustomError.invalidUrl
         }
         

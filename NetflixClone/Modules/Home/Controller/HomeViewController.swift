@@ -29,6 +29,8 @@ final class HomeViewController: UIViewController {
         return table
     }()
     
+    private var headerView: HomeHeaderUIView?
+    
     
     init(homeViewModel: HomeViewModel) {
         self.homeViewModel = homeViewModel
@@ -46,7 +48,8 @@ final class HomeViewController: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.tableHeaderView = HomeHeaderUIView(frame: .init(x: 0, y: 0, width: view.bounds.width, height: 450))
+        headerView = HomeHeaderUIView(frame: .init(x: 0, y: 0, width: view.bounds.width, height: 450))
+        tableView.tableHeaderView = headerView
         setupUsername()
         setupActionButtons()
         bindViewModel()
@@ -59,10 +62,21 @@ final class HomeViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        homeViewModel.$nowPlayingMovies
+        homeViewModel.$status
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.tableView.reloadSections(IndexSet(integer: Sections.nowPlaying.rawValue), with: .automatic)
+            .sink { [weak self] status in
+                guard let self else { return }
+                switch status {
+                case .initial:
+                    break
+                case .loading:
+                    break
+                case .success:
+                    self.headerView?.configure(with: self.homeViewModel.randomMovie)
+                    self.tableView.reloadData()
+                case .failure:
+                    break
+                }
             }
             .store(in: &cancellables)
     }
@@ -138,8 +152,10 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         switch sectionType {
         case .nowPlaying:
             cell.configure(with: homeViewModel.nowPlayingMovies)
-        case .popular, .topRated:
-            cell.configure(with: [])
+        case .popular:
+            cell.configure(with: homeViewModel.popularMovies)
+        case .topRated:
+            cell.configure(with: homeViewModel.topRatedMovies)
         }
         
         return cell
