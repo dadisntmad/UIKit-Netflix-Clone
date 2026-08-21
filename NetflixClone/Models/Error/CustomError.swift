@@ -5,6 +5,7 @@ enum CustomError: Error, LocalizedError {
     case decodingError
     case httpError(statusCode: Int)
     case networkError(Error)
+    case noSessionId
     
     var errorDescription: String? {
         switch self {
@@ -12,6 +13,7 @@ enum CustomError: Error, LocalizedError {
         case .decodingError: return "Failed to process response data."
         case .httpError(let code): return "HTTP Server error code: \(code)."
         case .networkError(let err): return err.localizedDescription
+        case .noSessionId: return "No session ID available."
         }
     }
 }

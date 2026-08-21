@@ -6,18 +6,25 @@ final class MainCoordinator: Coordinator {
     var navigationController: UINavigationController
     
     private let movieService: MovieServiceProtocol
+    private let userService: UserServiceProtocol
     
     init(
         navigationController: UINavigationController,
         movieService: MovieServiceProtocol,
+        userService: UserServiceProtocol
     ) {
         self.navigationController = navigationController
         self.movieService = movieService
+        self.userService = userService
     }
     
     func start() {
         let homeNav = UINavigationController()
-        let homeCoordinator = HomeCoordinator(navigationController: homeNav, movieService: movieService)
+        let homeCoordinator = HomeCoordinator(
+            navigationController: homeNav,
+            movieService: movieService,
+            userService: userService
+        )
         addChild(homeCoordinator)
         homeCoordinator.start()
         homeNav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(named: Icon.home), tag: 0)

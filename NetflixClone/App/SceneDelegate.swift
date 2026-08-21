@@ -15,11 +15,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
         
+        let keychainService = KeychainService()
+        
         let coordinator = AppCoordinator(
             window: window,
             authService: AuthService(),
-            keychainService: KeychainService(),
-            movieService: MovieService()
+            keychainService: keychainService,
+            movieService: MovieService(),
+            userService: UserService(keychainService: keychainService)
         )
         
         self.appCoordinator = coordinator

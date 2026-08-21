@@ -17,6 +17,7 @@ final class HomeViewController: UIViewController {
     }
     
     private let homeViewModel: HomeViewModel
+    private let accountViewModel: AccountViewModel
     private var cancellables = Set<AnyCancellable>()
     
     private let tableView: UITableView = {
@@ -29,11 +30,18 @@ final class HomeViewController: UIViewController {
         return table
     }()
     
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .label
+        label.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+        return label
+    }()
+    
     private var headerView: HomeHeaderUIView?
     
-    
-    init(homeViewModel: HomeViewModel) {
+    init(homeViewModel: HomeViewModel, accountViewModel: AccountViewModel) {
         self.homeViewModel = homeViewModel
+        self.accountViewModel = accountViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -53,7 +61,7 @@ final class HomeViewController: UIViewController {
         setupUsername()
         setupActionButtons()
         bindViewModel()
-        fetchMovies()
+        getData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -79,19 +87,28 @@ final class HomeViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        accountViewModel.$user
+            .receive(on: DispatchQueue.main)
+            .compactMap({ $0?.username })
+            .sink { [weak self] username in
+                guard let self = self else { return }
+                self.titleLabel.text = "For \(username)"
+                self.titleLabel.sizeToFit()
+                self.navigationController?.navigationBar.setNeedsLayout()
+            }
+            .store(in: &cancellables)
     }
     
-    private func fetchMovies() {
+    private func getData() {
         Task {
-            await homeViewModel.getMovies()
+            async let movies: () = homeViewModel.getMovies()
+            async let user: () = accountViewModel.getUser()
+            _ = await (movies, user)
         }
     }
     
     private func setupUsername() {
-        let titleLabel = UILabel()
-        titleLabel.text = "For username"
-        titleLabel.textColor = .white
-        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .medium)
         let btn = UIBarButtonItem(customView: titleLabel)
         btn.hidesSharedBackground = true
         navigationItem.leftBarButtonItem = btn
@@ -129,8 +146,6 @@ final class HomeViewController: UIViewController {
         btn.hidesSharedBackground = true
         navigationItem.rightBarButtonItem = btn
     }
-    
-    
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
