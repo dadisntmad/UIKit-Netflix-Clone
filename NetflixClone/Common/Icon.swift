@@ -11,4 +11,9 @@ enum Icon {
     static let systemPlayFill = "play.fill"
     static let systemPlus = "plus"
     static let systemTVFill = "4k.tv.fill"
+    static let systemCheckmark = "checkmark"
+    static let systemSettings = "gearshape.fill"
+    static let systemUser = "person.fill"
+    static let systemInfo = "info.circle"
+    static let systemEdit = "pencil"
 }
