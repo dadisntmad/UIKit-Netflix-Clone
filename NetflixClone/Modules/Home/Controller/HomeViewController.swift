@@ -16,6 +16,8 @@ final class HomeViewController: UIViewController {
         }
     }
     
+    var onProfileTapped: (() -> Void)?
+    
     private let homeViewModel: HomeViewModel
     private let accountViewModel: AccountViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -122,6 +124,7 @@ final class HomeViewController: UIViewController {
         searchBtn.setImage(UIImage(named: Icon.search), for: .normal)
         
         let profileBtn = UIButton(type: .custom)
+        profileBtn.addTarget(self, action: #selector(didTapProfileButton), for: .touchUpInside)
         if let profileImage = UIImage(named: Icon.profileImage)?.withRenderingMode(.alwaysOriginal) {
             profileBtn.setImage(profileImage, for: .normal)
         }
@@ -145,6 +148,10 @@ final class HomeViewController: UIViewController {
         let btn = UIBarButtonItem(customView: stack)
         btn.hidesSharedBackground = true
         navigationItem.rightBarButtonItem = btn
+    }
+    
+    @objc private func didTapProfileButton() {
+        onProfileTapped?()
     }
 }
 

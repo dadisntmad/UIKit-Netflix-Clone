@@ -23,6 +23,24 @@ final class HomeCoordinator: Coordinator {
         let homeViewModel = HomeViewModel(movieService: movieService)
         let accountViewModel = AccountViewModel(userService: userService)
         let vc = HomeViewController(homeViewModel: homeViewModel, accountViewModel: accountViewModel)
-        navigationController.setViewControllers([vc], animated: false)
+        
+        vc.onProfileTapped = { [weak self] in
+            self?.showAccountFlow()
+        }
+        
+        navigationController.pushViewController(vc, animated: false)
+    }
+    
+    private func showAccountFlow() {
+        let accountCoordinator = AccountCoordinator(navigationController: navigationController)
+        
+        // Handle cleanup when AccountViewController is popped
+        accountCoordinator.onFinish = { [weak self, weak accountCoordinator] in
+            guard let self, let accountCoordinator else { return }
+            self.removeChild(accountCoordinator)
+        }
+        
+        addChild(accountCoordinator)
+        accountCoordinator.start()
     }
 }
