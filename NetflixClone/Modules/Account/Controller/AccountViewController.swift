@@ -69,6 +69,15 @@ final class AccountViewController: UIViewController {
         return btn
     }()
     
+    private let signOutButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.setTitle("Sign Out", for: .normal)
+        btn.setTitleColor(.gray, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
+        return btn
+    }()
+    
     // MARK: - Stacks
     private lazy var profileContainerStack: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [profileBtn, profileLabel])
@@ -123,7 +132,12 @@ final class AccountViewController: UIViewController {
     
     // MARK: - Layout
     private func setupConstraints() {
-        [mainButtonsStack, manageProfilesBtn, menuListStack].forEach({ view.addSubview($0) })
+        [
+            mainButtonsStack,
+            manageProfilesBtn,
+            menuListStack,
+            signOutButton
+        ].forEach({ view.addSubview($0) })
         
         NSLayoutConstraint.activate([
             // Set explicit sizes for the buttons
@@ -144,7 +158,9 @@ final class AccountViewController: UIViewController {
             // Menu list stack
             menuListStack.topAnchor.constraint(equalTo: manageProfilesBtn.bottomAnchor, constant: 32),
             menuListStack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            menuListStack.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            menuListStack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            signOutButton.topAnchor.constraint(equalTo: menuListStack.bottomAnchor, constant: 16),
+            signOutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
