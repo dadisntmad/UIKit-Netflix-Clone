@@ -3,6 +3,13 @@ import UIKit
 final class AccountViewController: UIViewController {
     var onDismiss: (() -> Void)?
     
+    private let menuItems: [(icon: String, title: String)] = [
+        (Icon.systemCheckmark, "My List"),
+        (Icon.systemSettings, "App Settings"),
+        (Icon.systemUser, "Account"),
+        (Icon.systemInfo, "Help")
+    ]
+    
     private var profileBtn: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
@@ -88,11 +95,22 @@ final class AccountViewController: UIViewController {
         return stack
     }()
     
+    private lazy var menuListStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = 1
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "username"
         setupConstraints()
+        buildMenuStack()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -105,7 +123,7 @@ final class AccountViewController: UIViewController {
     
     // MARK: - Layout
     private func setupConstraints() {
-        [mainButtonsStack, manageProfilesBtn].forEach({ view.addSubview($0) })
+        [mainButtonsStack, manageProfilesBtn, menuListStack].forEach({ view.addSubview($0) })
         
         NSLayoutConstraint.activate([
             // Set explicit sizes for the buttons
@@ -121,7 +139,63 @@ final class AccountViewController: UIViewController {
             
             // Manage profiles button
             manageProfilesBtn.topAnchor.constraint(equalTo: mainButtonsStack.bottomAnchor, constant: 20),
-            manageProfilesBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            manageProfilesBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            // Menu list stack
+            menuListStack.topAnchor.constraint(equalTo: manageProfilesBtn.bottomAnchor, constant: 32),
+            menuListStack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            menuListStack.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+    }
+    
+    private func buildMenuStack() {
+        for item in menuItems {
+            let row = createRowView(iconName: item.icon, title: item.title)
+            menuListStack.addArrangedSubview(row)
+        }
+    }
+    
+    private func createRowView(iconName: String, title: String) -> UIView {
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        row.backgroundColor = .accentGrey
+        
+        let iconImageView = UIImageView(image: UIImage(systemName: iconName))
+        iconImageView.tintColor = .secondaryLabel
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.textColor = .label
+        titleLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let chevronImageView = UIImageView(image: UIImage(systemName: Icon.systemChevron))
+        chevronImageView.tintColor = .tertiaryLabel
+        chevronImageView.contentMode = .scaleAspectFit
+        chevronImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        row.addSubview(iconImageView)
+        row.addSubview(titleLabel)
+        row.addSubview(chevronImageView)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 16),
+            iconImageView.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
+            titleLabel.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            
+            chevronImageView.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -16),
+            chevronImageView.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            chevronImageView.widthAnchor.constraint(equalToConstant: 12),
+            chevronImageView.heightAnchor.constraint(equalToConstant: 18)
+        ])
+        
+        return row
     }
 }

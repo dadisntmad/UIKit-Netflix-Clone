@@ -16,4 +16,5 @@ enum Icon {
     static let systemUser = "person.fill"
     static let systemInfo = "info.circle"
     static let systemEdit = "pencil"
+    static let systemChevron = "chevron.right"
 }
