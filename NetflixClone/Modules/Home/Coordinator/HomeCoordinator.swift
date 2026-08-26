@@ -21,9 +21,8 @@ final class HomeCoordinator: Coordinator {
     }
     
     func start() {
-        let homeViewModel = HomeViewModel(movieService: movieService)
-        let accountViewModel = AccountViewModel(userService: userService)
-        let vc = HomeViewController(homeViewModel: homeViewModel, accountViewModel: accountViewModel)
+        let homeViewModel = HomeViewModel(movieService: movieService, userService: userService)
+        let vc = HomeViewController(homeViewModel: homeViewModel)
         
         vc.onProfileTapped = { [weak self] in
             self?.showAccountFlow()

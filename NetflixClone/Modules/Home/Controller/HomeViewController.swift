@@ -19,7 +19,6 @@ final class HomeViewController: UIViewController {
     var onProfileTapped: (() -> Void)?
     
     private let homeViewModel: HomeViewModel
-    private let accountViewModel: AccountViewModel
     private var cancellables = Set<AnyCancellable>()
     
     private let tableView: UITableView = {
@@ -41,9 +40,8 @@ final class HomeViewController: UIViewController {
     
     private var headerView: HomeHeaderUIView?
     
-    init(homeViewModel: HomeViewModel, accountViewModel: AccountViewModel) {
+    init(homeViewModel: HomeViewModel) {
         self.homeViewModel = homeViewModel
-        self.accountViewModel = accountViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -90,12 +88,11 @@ final class HomeViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        accountViewModel.$user
+        homeViewModel.$username
             .receive(on: DispatchQueue.main)
-            .compactMap({ $0?.username })
             .sink { [weak self] username in
                 guard let self = self else { return }
-                self.titleLabel.text = "For \(username)"
+                self.titleLabel.text = "For \(username ?? "")"
                 self.titleLabel.sizeToFit()
                 self.navigationController?.navigationBar.setNeedsLayout()
             }
@@ -104,9 +101,7 @@ final class HomeViewController: UIViewController {
     
     private func getData() {
         Task {
-            async let movies: () = homeViewModel.getMovies()
-            async let user: () = accountViewModel.getUser()
-            _ = await (movies, user)
+            await homeViewModel.getData()
         }
     }
     
