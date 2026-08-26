@@ -39,20 +39,4 @@ final class AuthViewModel {
             isAuthenticated = false
         }
     }
-    
-    func signOut() async {
-        status = .loading
-        
-        do {
-            let sessionId = await keychainService.load(forKey: AppConstants.sessionId)
-            
-            guard let sessionId = sessionId else { return }
-            
-            let res = try await authService.signOut(sessionId: sessionId)
-            keychainService.delete(forKey: AppConstants.sessionId)
-            status = res.success ? .success : .failure
-        } catch {
-            status = .failure
-        }
-    }
 }
