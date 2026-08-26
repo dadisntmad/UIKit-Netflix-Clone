@@ -8,6 +8,8 @@ final class MainCoordinator: Coordinator {
     private let movieService: MovieServiceProtocol
     private let userService: UserServiceProtocol
     
+    var onSignOut: (() -> Void)?
+    
     init(
         navigationController: UINavigationController,
         movieService: MovieServiceProtocol,
@@ -25,6 +27,11 @@ final class MainCoordinator: Coordinator {
             movieService: movieService,
             userService: userService
         )
+        
+        homeCoordinator.onSignOut = { [weak self] in
+            self?.onSignOut?()
+        }
+        
         addChild(homeCoordinator)
         homeCoordinator.start()
         homeNav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(named: Icon.home), tag: 0)

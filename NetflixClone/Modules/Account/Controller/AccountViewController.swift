@@ -2,6 +2,7 @@ import UIKit
 
 final class AccountViewController: UIViewController {
     var onDismiss: (() -> Void)?
+    var onSignOutTapped: (() -> Void)?
     
     private let menuItems: [(icon: String, title: String)] = [
         (Icon.systemCheckmark, "My List"),
@@ -69,8 +70,10 @@ final class AccountViewController: UIViewController {
         return btn
     }()
     
-    private let signOutButton: UIButton = {
-        let btn = UIButton(type: .system)
+    private lazy var signOutButton: UIButton = {
+        let btn = UIButton(type: .system, primaryAction: UIAction { [weak self] _ in
+            self?.onSignOutTapped?()
+        })
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Sign Out", for: .normal)
         btn.setTitleColor(.gray, for: .normal)

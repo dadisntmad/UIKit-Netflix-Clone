@@ -10,6 +10,7 @@ final class AccountCoordinator: Coordinator {
     }
     
     var onFinish: (() -> Void)?
+    var onSignOut: (() -> Void)?
     
     func start() {
         let vc = AccountViewController()
@@ -18,6 +19,10 @@ final class AccountCoordinator: Coordinator {
         // Listen for back button press / swipe-to-dismiss
         vc.onDismiss = { [weak self] in
             self?.onFinish?()
+        }
+        
+        vc.onSignOutTapped = { [weak self] in
+            self?.onSignOut?()
         }
         
         navigationController.pushViewController(vc, animated: true)

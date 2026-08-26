@@ -8,6 +8,7 @@ final class HomeCoordinator: Coordinator {
     private let movieService: MovieServiceProtocol
     private let userService: UserServiceProtocol
     
+    var onSignOut: (() -> Void)?
     
     init(
         navigationController: UINavigationController,
@@ -38,6 +39,10 @@ final class HomeCoordinator: Coordinator {
         accountCoordinator.onFinish = { [weak self, weak accountCoordinator] in
             guard let self, let accountCoordinator else { return }
             self.removeChild(accountCoordinator)
+        }
+        
+        accountCoordinator.onSignOut = { [weak self] in
+            self?.onSignOut?()
         }
         
         addChild(accountCoordinator)
