@@ -4,16 +4,22 @@ final class AccountCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     
     var navigationController: UINavigationController
+    private let userService: UserServiceProtocol
     
-    init(navigationController: UINavigationController) {
+    init(
+        navigationController: UINavigationController,
+        userService: UserServiceProtocol
+    ) {
         self.navigationController = navigationController
+        self.userService = userService
     }
     
     var onFinish: (() -> Void)?
     var onSignOut: (() -> Void)?
     
     func start() {
-        let vc = AccountViewController()
+        let accountViewModel = AccountViewModel(userService: userService)
+        let vc = AccountViewController(accountViewModel: accountViewModel)
         vc.hidesBottomBarWhenPushed = true
         
         // Listen for back button press / swipe-to-dismiss

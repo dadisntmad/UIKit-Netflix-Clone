@@ -32,7 +32,10 @@ final class HomeCoordinator: Coordinator {
     }
     
     private func showAccountFlow() {
-        let accountCoordinator = AccountCoordinator(navigationController: navigationController)
+        let accountCoordinator = AccountCoordinator(
+            navigationController: navigationController,
+            userService: userService
+        )
         
         // Handle cleanup when AccountViewController is popped
         accountCoordinator.onFinish = { [weak self, weak accountCoordinator] in

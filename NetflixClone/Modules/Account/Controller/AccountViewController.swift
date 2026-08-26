@@ -1,8 +1,12 @@
 import UIKit
+import Combine
 
 final class AccountViewController: UIViewController {
     var onDismiss: (() -> Void)?
     var onSignOutTapped: (() -> Void)?
+    
+    private let accountViewModel: AccountViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let menuItems: [(icon: String, title: String)] = [
         (Icon.systemCheckmark, "My List"),
@@ -40,7 +44,6 @@ final class AccountViewController: UIViewController {
     
     private let profileLabel: UILabel = {
         let label = UILabel()
-        label.text = "username"
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = .label
         label.textAlignment = .center
@@ -117,12 +120,26 @@ final class AccountViewController: UIViewController {
         return stack
     }()
     
+    init(accountViewModel: AccountViewModel) {
+        self.accountViewModel = accountViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        title = "username"
+        title = "Profile"
         setupConstraints()
         buildMenuStack()
+        bindViewModel()
+        
+        Task {
+            await accountViewModel.getUser()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -131,6 +148,39 @@ final class AccountViewController: UIViewController {
         if isMovingFromParent || isBeingDismissed {
             onDismiss?()
         }
+    }
+    
+    private func bindViewModel() {
+        // 1. Update title and profile label based on loading status
+        accountViewModel.$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                switch status {
+                case .loading:
+                    self.title = "Loading..."
+                    self.profileLabel.text = "Loading..."
+                case .initial:
+                    self.title = nil
+                    self.profileLabel.text = nil
+                case .success:
+                    break // Handled by $user publisher below
+                case .failure:
+                    self.title = "Account"
+                    self.profileLabel.text = "Error"
+                }
+            }
+            .store(in: &cancellables)
+        
+        // 2. Update navigation title & profile label when the user model arrives
+        accountViewModel.$user
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0?.username }
+            .sink { [weak self] username in
+                self?.title = username
+                self?.profileLabel.text = username
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Layout
