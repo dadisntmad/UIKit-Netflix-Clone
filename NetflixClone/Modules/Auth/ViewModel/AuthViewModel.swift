@@ -49,6 +49,7 @@ final class AuthViewModel {
             guard let sessionId = sessionId else { return }
             
             let res = try await authService.signOut(sessionId: sessionId)
+            keychainService.delete(forKey: AppConstants.sessionId)
             status = res.success ? .success : .failure
         } catch {
             status = .failure
