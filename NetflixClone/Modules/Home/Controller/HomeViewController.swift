@@ -59,7 +59,7 @@ final class HomeViewController: UIViewController {
         headerView = HomeHeaderUIView(frame: .init(x: 0, y: 0, width: view.bounds.width, height: 450))
         tableView.tableHeaderView = headerView
         setupUsername()
-        setupActionButtons()
+        setupActionButtons(didTapProfileButton: #selector(didTapProfileButton))
         bindViewModel()
         getData()
     }
@@ -109,40 +109,6 @@ final class HomeViewController: UIViewController {
         let btn = UIBarButtonItem(customView: titleLabel)
         btn.hidesSharedBackground = true
         navigationItem.leftBarButtonItem = btn
-    }
-    
-    private func setupActionButtons() {
-        let tvBtn = UIButton(type: .system)
-        tvBtn.setImage(UIImage(systemName: Icon.systemTVFill), for: .normal)
-        
-        let searchBtn = UIButton(type: .system)
-        searchBtn.setImage(UIImage(named: Icon.search), for: .normal)
-        
-        let profileBtn = UIButton(type: .custom)
-        profileBtn.addTarget(self, action: #selector(didTapProfileButton), for: .touchUpInside)
-        if let profileImage = UIImage(named: Icon.profileImage)?.withRenderingMode(.alwaysOriginal) {
-            profileBtn.setImage(profileImage, for: .normal)
-        }
-        
-        [tvBtn, searchBtn, profileBtn].forEach { button in
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.tintColor = .white
-            
-            NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalToConstant: 28),
-                button.heightAnchor.constraint(equalToConstant: 28)
-            ])
-        }
-        
-        let stack = UIStackView(arrangedSubviews: [tvBtn, searchBtn, profileBtn])
-        stack.axis = .horizontal
-        stack.spacing = 10
-        stack.distribution = .fillEqually
-        stack.alignment = .center
-        
-        let btn = UIBarButtonItem(customView: stack)
-        btn.hidesSharedBackground = true
-        navigationItem.rightBarButtonItem = btn
     }
     
     @objc private func didTapProfileButton() {
