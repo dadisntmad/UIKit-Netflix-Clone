@@ -12,6 +12,12 @@ final class NewAndHotViewCell: UITableViewCell {
             return formatter
         }()
         
+        static let yearFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy"
+            return formatter
+        }()
+        
         static let monthFormatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM"
@@ -33,17 +39,22 @@ final class NewAndHotViewCell: UITableViewCell {
         return imageView
     }()
     
+    private let yearLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
     private let monthLabel: UILabel = {
         let label = UILabel()
-        label.text = "Oct"
-        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .secondaryLabel
         return label
     }()
     
     private let dayLabel: UILabel = {
         let label = UILabel()
-        label.text = "01"
         label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
@@ -71,7 +82,7 @@ final class NewAndHotViewCell: UITableViewCell {
     }()
     
     private lazy var movieDateStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [monthLabel, dayLabel])
+        let stack = UIStackView(arrangedSubviews: [monthLabel, dayLabel, yearLabel])
         stack.axis = .horizontal
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.spacing = 4
@@ -127,6 +138,7 @@ final class NewAndHotViewCell: UITableViewCell {
         
         monthLabel.text = DateFormatters.monthFormatter.string(from: date)
         dayLabel.text = DateFormatters.dayFormatter.string(from: date)
+        yearLabel.text = DateFormatters.yearFormatter.string(from: date)
     }
     
     private func setupConstraints() {

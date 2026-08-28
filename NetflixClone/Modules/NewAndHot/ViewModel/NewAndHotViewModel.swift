@@ -1,3 +1,4 @@
+import Foundation
 import Combine
 
 @MainActor
@@ -16,7 +17,12 @@ final class NewAndHotViewModel {
         
         do {
             let res = try await movieService.getUpcomingMovies()
-            movies = res.results
+            movies = res.results.sorted { first, second in
+                guard let date1 = first.releaseDate, let date2 = second.releaseDate else {
+                    return first.releaseDate != nil
+                }
+                return date1 > date2
+            }
             status = .success
         } catch {
             status = .failure
