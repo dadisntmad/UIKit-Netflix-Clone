@@ -1,6 +1,10 @@
 import UIKit
+import Combine
 
 final class NewAndHotViewController: UIViewController {
+    private let newAndHotViewModel: NewAndHotViewModel
+    private var cancellables = Set<AnyCancellable>()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .label
@@ -12,11 +16,19 @@ final class NewAndHotViewController: UIViewController {
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.register(NewAndHotViewCell.self, forCellReuseIdentifier: NewAndHotViewCell.identifier)
-        table.translatesAutoresizingMaskIntoConstraints = false
         table.showsVerticalScrollIndicator = false
         table.separatorStyle = .none
         return table
     }()
+    
+    init(newAndHotViewModel: NewAndHotViewModel) {
+        self.newAndHotViewModel = newAndHotViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +39,8 @@ final class NewAndHotViewController: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        getUpcomingMovies()
+        bindViewModel()
     }
     
     override func viewDidLayoutSubviews() {
@@ -40,16 +54,32 @@ final class NewAndHotViewController: UIViewController {
         navigationItem.leftBarButtonItem = btn
     }
     
+    private func getUpcomingMovies() {
+        Task {
+            await newAndHotViewModel.getUpcomingMovies()
+        }
+    }
+    
+    private func bindViewModel() {
+        newAndHotViewModel.$movies
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] movies in
+                guard let self else { return }
+                self.tableView.reloadData()
+            }
+            .store(in: &cancellables)
+    }
+    
     @objc private func didTapProfileButton() {}
 }
 
 extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        2
+        1
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        10
+        newAndHotViewModel.movies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -57,16 +87,7 @@ extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let movie = Movie(
-            id: 123,
-            title: "Spider-Man: Brand New Day",
-            voteAverage: 8.5,
-            backdropPath: "https://sm.ign.com/t/ign_br/video/s/spider-man/spider-man-brand-new-day-official-day-one-on-set-featurette_56gk.1280.jpg",
-            genreIds: nil,
-            overview: nil,
-            posterPath: nil,
-            releaseDate: nil
-        )
+        let movie = newAndHotViewModel.movies[indexPath.section]
         
         cell.configure(for: movie)
         

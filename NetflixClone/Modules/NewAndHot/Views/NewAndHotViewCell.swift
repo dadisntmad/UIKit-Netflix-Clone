@@ -4,6 +4,27 @@ import SDWebImage
 final class NewAndHotViewCell: UITableViewCell {
     static let identifier = "NewAndHotViewCell"
     
+    private enum DateFormatters {
+        static let inputFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            return formatter
+        }()
+        
+        static let monthFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM"
+            return formatter
+        }()
+        
+        static let dayFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd"
+            return formatter
+        }()
+    }
+    
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -90,10 +111,22 @@ final class NewAndHotViewCell: UITableViewCell {
     }
     
     func configure(for movie: Movie) {
-        guard let backdropPath = movie.backdropPath,
-              let url = URL(string: backdropPath) else { return }
-        posterImageView.sd_setImage(with: url, completed: nil)
+        if movie.backdropPath?.isEmpty ?? false {
+            return
+        }
+        posterImageView.sd_setImage(with: URL(string: movie.movieBackdropPath), completed: nil)
         movieLabel.text = movie.title
+        
+        // Convert API string ("2026-10-01") to Date, then format for UI
+        guard let releaseDateString = movie.releaseDate,
+              let date = DateFormatters.inputFormatter.date(from: releaseDateString) else {
+            monthLabel.text = ""
+            dayLabel.text = ""
+            return
+        }
+        
+        monthLabel.text = DateFormatters.monthFormatter.string(from: date)
+        dayLabel.text = DateFormatters.dayFormatter.string(from: date)
     }
     
     private func setupConstraints() {

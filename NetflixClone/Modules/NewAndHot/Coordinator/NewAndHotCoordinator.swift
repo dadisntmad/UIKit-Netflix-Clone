@@ -5,12 +5,19 @@ final class NewAndHotCoordinator: Coordinator {
     
     var navigationController: UINavigationController
     
-    init(navigationController: UINavigationController) {
+    private let moviService: MovieServiceProtocol
+    
+    init(
+        navigationController: UINavigationController,
+        moviService: MovieServiceProtocol
+    ) {
         self.navigationController = navigationController
+        self.moviService = moviService
     }
     
     func start() {
-        let vc = NewAndHotViewController()
+        let viewModel = NewAndHotViewModel(movieService: moviService)
+        let vc = NewAndHotViewController(newAndHotViewModel: viewModel)
         navigationController.setViewControllers([vc], animated: false)
     }
 }

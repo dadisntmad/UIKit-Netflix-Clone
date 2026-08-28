@@ -26,6 +26,10 @@ struct Movie: Codable {
         "https://image.tmdb.org/t/p/w500\(posterPath ?? "")"
     }
     
+    var movieBackdropPath: String {
+        "https://image.tmdb.org/t/p/w500\(backdropPath ?? "")"
+    }
+    
     enum CodingKeys: String, CodingKey {
         case id
         case title

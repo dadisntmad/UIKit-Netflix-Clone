@@ -37,7 +37,10 @@ final class MainCoordinator: Coordinator {
         homeNav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(named: Icon.home), tag: 0)
         
         let newAndHotNav = UINavigationController()
-        let newAndHotCoordinator = NewAndHotCoordinator(navigationController: newAndHotNav)
+        let newAndHotCoordinator = NewAndHotCoordinator(
+            navigationController: newAndHotNav,
+            moviService: movieService
+        )
         addChild(newAndHotCoordinator)
         newAndHotCoordinator.start()
         newAndHotNav.tabBarItem = UITabBarItem(title: "New & Hot", image: UIImage(named: Icon.new), tag: 1)
