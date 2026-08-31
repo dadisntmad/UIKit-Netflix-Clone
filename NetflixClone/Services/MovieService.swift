@@ -2,7 +2,7 @@ import Foundation
 
 protocol MovieServiceProtocol {
     func getMovies(for type: MovieType) async throws -> MovieResponse
-    func getUpcomingMovies() async throws -> MovieResponse
+    func getUpcomingMovies(page: Int) async throws -> MovieResponse
 }
 
 final class MovieService: MovieServiceProtocol {
@@ -28,13 +28,14 @@ final class MovieService: MovieServiceProtocol {
         return try JSONDecoder().decode(MovieResponse.self, from: data)
     }
     
-    func getUpcomingMovies() async throws -> MovieResponse {
+    func getUpcomingMovies(page: Int) async throws -> MovieResponse {
         guard var components = URLComponents(string: "\(baseUrl)/upcoming") else {
             throw CustomError.invalidUrl
         }
         
         components.queryItems = [
-            URLQueryItem(name: "api_key", value: AppConfig.shared.apiKey)
+            URLQueryItem(name: "api_key", value: AppConfig.shared.apiKey),
+            URLQueryItem(name: "page", value: String(page)),
         ]
         
         guard let url = components.url else {

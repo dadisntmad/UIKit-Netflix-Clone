@@ -39,6 +39,7 @@ final class NewAndHotViewController: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.prefetchDataSource = self
         getUpcomingMovies()
         bindViewModel()
     }
@@ -73,7 +74,7 @@ final class NewAndHotViewController: UIViewController {
     @objc private func didTapProfileButton() {}
 }
 
-extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource {
+extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         1
     }
@@ -100,5 +101,12 @@ extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         100
+    }
+    
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        let needsFetch = indexPaths.contains { $0.section >= newAndHotViewModel.movies.count - 3 }
+        if needsFetch {
+            getUpcomingMovies()
+        }
     }
 }
