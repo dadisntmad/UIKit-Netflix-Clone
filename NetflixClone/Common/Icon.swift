@@ -18,4 +18,5 @@ enum Icon {
     static let systemEdit = "pencil"
     static let systemChevron = "chevron.right"
     static let systemBell = "bell"
+    static let systemPlayCircle = "play.circle"
 }
