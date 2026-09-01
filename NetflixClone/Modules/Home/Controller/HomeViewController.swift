@@ -17,6 +17,7 @@ final class HomeViewController: UIViewController {
     }
     
     var onProfileTapped: (() -> Void)?
+    var onSearchTapped: (() -> Void)?
     
     private let homeViewModel: HomeViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -59,7 +60,10 @@ final class HomeViewController: UIViewController {
         headerView = HomeHeaderUIView(frame: .init(x: 0, y: 0, width: view.bounds.width, height: 450))
         tableView.tableHeaderView = headerView
         setupUsername()
-        setupActionButtons(didTapProfileButton: #selector(didTapProfileButton))
+        setupActionButtons(
+            didTapProfileButton: #selector(didTapProfileButton),
+            didTapSearchButton: #selector(didTapSearchButton)
+        )
         bindViewModel()
         getData()
     }
@@ -113,6 +117,10 @@ final class HomeViewController: UIViewController {
     
     @objc private func didTapProfileButton() {
         onProfileTapped?()
+    }
+    
+    @objc private func didTapSearchButton() {
+        onSearchTapped?()
     }
 }
 

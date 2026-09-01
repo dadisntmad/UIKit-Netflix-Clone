@@ -28,6 +28,10 @@ final class HomeCoordinator: Coordinator {
             self?.showAccountFlow()
         }
         
+        vc.onSearchTapped = { [weak self] in
+            self?.showSearchFlow()
+        }
+        
         navigationController.pushViewController(vc, animated: false)
     }
     
@@ -49,5 +53,17 @@ final class HomeCoordinator: Coordinator {
         
         addChild(accountCoordinator)
         accountCoordinator.start()
+    }
+    
+    private func showSearchFlow() {
+        let searchCoordinator = SearchCoordinator(navigationController: navigationController)
+        
+        searchCoordinator.onFinish = { [weak self, weak searchCoordinator] in
+            guard let self, let searchCoordinator else { return }
+            self.removeChild(searchCoordinator)
+        }
+        
+        addChild(searchCoordinator)
+        searchCoordinator.start()
     }
 }

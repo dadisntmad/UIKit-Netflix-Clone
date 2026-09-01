@@ -1,12 +1,13 @@
 import UIKit
 
 extension UIViewController {
-    func setupActionButtons(didTapProfileButton: Selector) {
+    func setupActionButtons(didTapProfileButton: Selector, didTapSearchButton: Selector) {
         let tvBtn = UIButton(type: .system)
         tvBtn.setImage(UIImage(systemName: Icon.systemTVFill), for: .normal)
         
         let searchBtn = UIButton(type: .system)
         searchBtn.setImage(UIImage(named: Icon.search), for: .normal)
+        searchBtn.addTarget(self, action: didTapSearchButton, for: .touchUpInside)
         
         let profileBtn = UIButton(type: .custom)
         profileBtn.addTarget(self, action: didTapProfileButton, for: .touchUpInside)

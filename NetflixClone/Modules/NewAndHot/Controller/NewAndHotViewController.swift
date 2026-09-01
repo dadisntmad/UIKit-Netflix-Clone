@@ -34,7 +34,10 @@ final class NewAndHotViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupTitle()
-        setupActionButtons(didTapProfileButton: #selector(didTapProfileButton))
+        setupActionButtons(
+            didTapProfileButton: #selector(didTapProfileButton),
+            didTapSearchButton: #selector(didTapSearchButton)
+        )
         
         view.addSubview(tableView)
         tableView.delegate = self
@@ -72,6 +75,7 @@ final class NewAndHotViewController: UIViewController {
     }
     
     @objc private func didTapProfileButton() {}
+    @objc private func didTapSearchButton() {}
 }
 
 extension NewAndHotViewController: UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching {
