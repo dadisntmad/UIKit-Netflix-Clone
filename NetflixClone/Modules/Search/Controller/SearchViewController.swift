@@ -1,7 +1,11 @@
 import UIKit
+import Combine
 
 final class SearchViewController: UIViewController {
     var onDidDisappear: (() -> Void)?
+    
+    private let searchViewModel: SearchViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let tableView: UITableView = {
         let table = UITableView()
@@ -10,15 +14,22 @@ final class SearchViewController: UIViewController {
         return table
     }()
     
+    init(searchViewModel: SearchViewModel) {
+        self.searchViewModel = searchViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
-        let searchController = UISearchController(searchResultsController: nil)
-        navigationItem.searchController = searchController
-        tableView.delegate = self
-        tableView.dataSource = self
-        view.addSubview(tableView)
+        setupSearchController()
+        setupTableView()
+        bindViewModel()
     }
     
     override func viewDidLayoutSubviews() {
@@ -33,11 +44,35 @@ final class SearchViewController: UIViewController {
             onDidDisappear?()
         }
     }
+    
+    private func setupSearchController() {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+    }
+    
+    private func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        view.addSubview(tableView)
+    }
+    
+    private func bindViewModel() {
+        // Observe movies update to reload table view
+        searchViewModel.$movies
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
+    }
 }
 
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        1
+        searchViewModel.movies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -45,19 +80,16 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let movie = Movie(
-            id: 123,
-            title: "Legend",
-            voteAverage: 8.5,
-            backdropPath: "https://images4.alphacoders.com/806/thumb-1920-806396.jpg",
-            genreIds: nil,
-            overview: nil,
-            posterPath: nil,
-            releaseDate: nil
-        )
+        let movie = searchViewModel.movies[indexPath.row]
         
         cell.configure(for: movie)
         
         return cell
+    }
+}
+
+extension SearchViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        searchViewModel.searchText = searchController.searchBar.text ?? ""
     }
 }

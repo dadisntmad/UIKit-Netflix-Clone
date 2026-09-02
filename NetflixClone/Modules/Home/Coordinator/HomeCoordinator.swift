@@ -56,7 +56,10 @@ final class HomeCoordinator: Coordinator {
     }
     
     private func showSearchFlow() {
-        let searchCoordinator = SearchCoordinator(navigationController: navigationController)
+        let searchCoordinator = SearchCoordinator(
+            navigationController: navigationController,
+            movieService: movieService
+        )
         
         searchCoordinator.onFinish = { [weak self, weak searchCoordinator] in
             guard let self, let searchCoordinator else { return }

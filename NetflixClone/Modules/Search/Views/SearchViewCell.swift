@@ -46,10 +46,10 @@ final class SearchViewCell: UITableViewCell {
     }
     
     func configure(for movie: Movie) {
-        //        if movie.backdropPath?.isEmpty ?? false {
-        //            return
-        //        }
-        posterImageView.sd_setImage(with: URL(string: movie.backdropPath ?? ""), completed: nil)
+        if movie.backdropPath?.isEmpty ?? false {
+            return
+        }
+        posterImageView.sd_setImage(with: URL(string: movie.movieBackdropPath), completed: nil)
         movieLabel.text = movie.title
     }
     
