@@ -14,6 +14,14 @@ final class SearchViewController: UIViewController {
         return table
     }()
     
+    private let spinner: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
+    private let emptyView = EmptyView()
+    
     init(searchViewModel: SearchViewModel) {
         self.searchViewModel = searchViewModel
         super.init(nibName: nil, bundle: nil)
@@ -28,7 +36,7 @@ final class SearchViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         setupSearchController()
-        setupTableView()
+        setupViews()
         bindViewModel()
     }
     
@@ -53,10 +61,20 @@ final class SearchViewController: UIViewController {
         navigationItem.hidesSearchBarWhenScrolling = false
     }
     
-    private func setupTableView() {
+    private func setupViews() {
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
+        
+        tableView.backgroundView = emptyView
+        
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(spinner)
+        
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
     
     private func bindViewModel() {
@@ -67,6 +85,47 @@ final class SearchViewController: UIViewController {
                 self?.tableView.reloadData()
             }
             .store(in: &cancellables)
+        
+        searchViewModel.$status
+            .receive(on: RunLoop.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                
+                switch status {
+                case .loading:
+                    self.spinner.startAnimating()
+                    self.emptyView.isHidden = true
+                    
+                case .success, .failure, .initial:
+                    self.spinner.stopAnimating()
+                    self.updateEmptyState()
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateEmptyState() {
+        let query = searchViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isEmpty = searchViewModel.movies.isEmpty
+        let isLoading = searchViewModel.status == .loading
+        
+        guard !isLoading else {
+            emptyView.isHidden = true
+            return
+        }
+        
+        if isEmpty {
+            emptyView.isHidden = false
+            if query.isEmpty {
+                // emptyView state before typing
+                emptyView.setMessage("Search for movies")
+            } else {
+                // Search finished with zero results
+                emptyView.setMessage("No movies found for \"\(query)\"")
+            }
+        } else {
+            emptyView.isHidden = true
+        }
     }
 }
 
