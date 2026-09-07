@@ -32,6 +32,10 @@ final class HomeCoordinator: Coordinator {
             self?.showSearchFlow()
         }
         
+        vc.onMovieTapped = { [weak self] selectedMovie in
+            self?.showMovieDetailsFlow(for: selectedMovie)
+        }
+        
         navigationController.pushViewController(vc, animated: false)
     }
     
@@ -68,5 +72,20 @@ final class HomeCoordinator: Coordinator {
         
         addChild(searchCoordinator)
         searchCoordinator.start()
+    }
+    
+    private func showMovieDetailsFlow(for movie: Movie) {
+        let detailsCoordinator = MovieDetailsCoordinator(
+            navigationController: navigationController,
+            movie: movie
+        )
+        
+        detailsCoordinator.onFinish = { [weak self, weak detailsCoordinator] in
+            guard let self = self, let detailsCoordinator = detailsCoordinator else { return }
+            self.removeChild(detailsCoordinator)
+        }
+        
+        addChild(detailsCoordinator)
+        detailsCoordinator.start()
     }
 }

@@ -1,7 +1,13 @@
 import UIKit
 
+protocol HomeCollectionViewTableViewCellDelegate: AnyObject {
+    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movie: Movie)
+}
+
 final class HomeCollectionViewTableViewCell: UITableViewCell {
     static let identifier = "HomeCollectionViewTableViewCell"
+    
+    weak var delegate: HomeCollectionViewTableViewCellDelegate?
     
     private var movies: [Movie] = []
     
@@ -53,5 +59,11 @@ extension HomeCollectionViewTableViewCell: UICollectionViewDelegate, UICollectio
         cell.configure(with: movies[indexPath.row].moviePosterPath)
         
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let selectedMovie = movies[indexPath.item]
+        delegate?.homeCollectionViewTableViewCell(self, didSelectMovie: selectedMovie)
     }
 }

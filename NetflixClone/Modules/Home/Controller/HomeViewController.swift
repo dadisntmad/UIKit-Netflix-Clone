@@ -18,6 +18,7 @@ final class HomeViewController: UIViewController {
     
     var onProfileTapped: (() -> Void)?
     var onSearchTapped: (() -> Void)?
+    var onMovieTapped: ((Movie) -> Void)?
     
     private let homeViewModel: HomeViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -124,7 +125,7 @@ final class HomeViewController: UIViewController {
     }
 }
 
-extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
+extension HomeViewController: UITableViewDelegate, UITableViewDataSource, HomeCollectionViewTableViewCellDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         1
     }
@@ -137,6 +138,8 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeCollectionViewTableViewCell.identifier, for: indexPath) as? HomeCollectionViewTableViewCell else {
             return UITableViewCell()
         }
+        
+        cell.delegate = self
         
         guard let sectionType = Sections(rawValue: indexPath.section) else { return cell }
         
@@ -176,6 +179,10 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         let defaultOffset = view.safeAreaInsets.top
         let offset = scrollView.contentOffset.y + defaultOffset
         navigationController?.navigationBar.transform = .init(translationX: 0, y: min(0, -offset))
+    }
+    
+    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movie: Movie) {
+        onMovieTapped?(movie)
     }
 }
 
