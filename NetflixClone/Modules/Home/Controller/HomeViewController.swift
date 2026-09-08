@@ -74,6 +74,12 @@ final class HomeViewController: UIViewController {
         tableView.frame = view.bounds
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Reset the navigation bar frame/position for pushed view controllers
+        navigationController?.navigationBar.transform = .identity
+    }
+    
     private func bindViewModel() {
         homeViewModel.$status
             .receive(on: DispatchQueue.main)
