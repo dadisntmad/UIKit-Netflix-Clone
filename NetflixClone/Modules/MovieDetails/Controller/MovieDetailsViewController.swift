@@ -5,6 +5,9 @@ final class MovieDetailsViewController: UIViewController {
     
     private let movie: Movie
     
+    private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
+    private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -91,6 +94,7 @@ final class MovieDetailsViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupConstraints()
+        configureData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -112,9 +116,9 @@ final class MovieDetailsViewController: UIViewController {
             playButton,
             downloadButton,
             movieOverview,
-        ].forEach { view in
-            scrollView.addSubview(view)
-        }
+            castSectionView,
+            directorSectionView
+        ].forEach { contentView.addSubview($0) }
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -162,7 +166,30 @@ final class MovieDetailsViewController: UIViewController {
             movieOverview.topAnchor.constraint(equalTo: downloadButton.bottomAnchor, constant: 16),
             movieOverview.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             movieOverview.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            movieOverview.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+            
+            // Cast
+            castSectionView.topAnchor.constraint(equalTo: movieOverview.bottomAnchor, constant: 16),
+            castSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            castSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            // Director
+            directorSectionView.topAnchor.constraint(equalTo: castSectionView.bottomAnchor, constant: 12),
+            directorSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            directorSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            directorSectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
         ])
+    }
+    
+    private func configureData() {
+        castSectionView.configure(
+            prefixText: "Cast",
+            contentText: "Tom Hardy, Emily Browning, Christopher Eccleston, David Thewlis, Taron Egerton, Chazz Palminteri, Colin Morgan, Paul Bettany..."
+        )
+        
+        directorSectionView.configure(
+            prefixText: "Director",
+            contentText: "Brian Helgeland, Quentin Tarantino, Martin Scorsese, Christopher Nolan"
+        )
     }
 }
