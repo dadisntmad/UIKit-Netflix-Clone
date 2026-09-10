@@ -7,6 +7,7 @@ final class MovieDetailsViewController: UIViewController {
     
     private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
+    private let actionButtonsView = MovieActionButtonsView()
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -117,7 +118,8 @@ final class MovieDetailsViewController: UIViewController {
             downloadButton,
             movieOverview,
             castSectionView,
-            directorSectionView
+            directorSectionView,
+            actionButtonsView
         ].forEach { contentView.addSubview($0) }
         
         NSLayoutConstraint.activate([
@@ -177,7 +179,12 @@ final class MovieDetailsViewController: UIViewController {
             directorSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             directorSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            directorSectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
+            // Action buttons
+            actionButtonsView.topAnchor.constraint(equalTo: directorSectionView.bottomAnchor, constant: 16),
+            actionButtonsView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            actionButtonsView.heightAnchor.constraint(equalToConstant: 60),
+            
+            actionButtonsView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
         ])
     }
     

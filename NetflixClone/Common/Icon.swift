@@ -21,4 +21,7 @@ enum Icon {
     static let systemPlayCircle = "play.circle"
     static let systemFilm = "film"
     static let systemArrowDownCircle = "arrow.down.circle"
+    static let systemThumbsUp = "hand.thumbsup"
+    static let systemThumbsUpFill = "hand.thumbsup.fill"
+    static let systemShare = "square.and.arrow.up"
 }
