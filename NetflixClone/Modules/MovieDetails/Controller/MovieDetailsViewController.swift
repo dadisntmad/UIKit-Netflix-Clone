@@ -4,10 +4,45 @@ final class MovieDetailsViewController: UIViewController {
     var onDismiss: (() -> Void)?
     
     private let movie: Movie
+    private var similarMovies: [Movie] = [
+        Movie(
+            id: 1,
+            title: "The Krays",
+            voteAverage: 8,
+            backdropPath: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpU4C4QPOuW-hA9BSbd9VbmbQTPzwCW2c-AoZlHj_bmIScglnFo9jT2NY&s=10",
+            genreIds: nil,
+            overview: nil,
+            posterPath: nil,
+            releaseDate: nil
+        )
+    ]
     
     private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let actionButtonsView = MovieActionButtonsView()
+    
+    private var tableViewHeightConstraint: NSLayoutConstraint?
+    
+    private let sectionHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "More Like This"
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.textColor = .label
+        return label
+    }()
+    
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .plain)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.isScrollEnabled = false // Main UIScrollView handles scrolling
+        tableView.backgroundColor = .clear
+        tableView.separatorStyle = .none
+        tableView.register(SimilarMovieTableViewCell.self, forCellReuseIdentifier: SimilarMovieTableViewCell.identifier)
+        tableView.delegate = self
+        tableView.dataSource = self
+        return tableView
+    }()
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -98,6 +133,11 @@ final class MovieDetailsViewController: UIViewController {
         configureData()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableViewHeightConstraint?.constant = tableView.contentSize.height
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
@@ -119,8 +159,12 @@ final class MovieDetailsViewController: UIViewController {
             movieOverview,
             castSectionView,
             directorSectionView,
-            actionButtonsView
+            actionButtonsView,
+            sectionHeaderLabel,
+            tableView
         ].forEach { contentView.addSubview($0) }
+        
+        tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 0)
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -184,7 +228,17 @@ final class MovieDetailsViewController: UIViewController {
             actionButtonsView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             actionButtonsView.heightAnchor.constraint(equalToConstant: 60),
             
-            actionButtonsView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+            // More like this movies label
+            sectionHeaderLabel.topAnchor.constraint(equalTo: actionButtonsView.bottomAnchor, constant: 24),
+            sectionHeaderLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            sectionHeaderLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            tableView.topAnchor.constraint(equalTo: sectionHeaderLabel.bottomAnchor, constant: 12),
+            tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
+            tableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
+            tableViewHeightConstraint!
         ])
     }
     
@@ -198,5 +252,26 @@ final class MovieDetailsViewController: UIViewController {
             prefixText: "Director",
             contentText: "Brian Helgeland, Quentin Tarantino, Martin Scorsese, Christopher Nolan"
         )
+    }
+}
+
+extension MovieDetailsViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        similarMovies.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: SimilarMovieTableViewCell.identifier, for: indexPath) as? SimilarMovieTableViewCell else {
+            return UITableViewCell()
+        }
+        
+        let movie = similarMovies[indexPath.row]
+        cell.configure(with: movie)
+        cell.onDownloadTapped = {}
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        87
     }
 }
