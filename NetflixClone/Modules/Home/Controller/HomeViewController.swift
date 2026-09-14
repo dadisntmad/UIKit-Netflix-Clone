@@ -18,7 +18,7 @@ final class HomeViewController: UIViewController {
     
     var onProfileTapped: (() -> Void)?
     var onSearchTapped: (() -> Void)?
-    var onMovieTapped: ((Movie) -> Void)?
+    var onMovieTapped: ((Int) -> Void)?
     
     private let homeViewModel: HomeViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -187,8 +187,8 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource, HomeCo
         navigationController?.navigationBar.transform = .init(translationX: 0, y: min(0, -offset))
     }
     
-    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movie: Movie) {
-        onMovieTapped?(movie)
+    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movieId: Int) {
+        onMovieTapped?(movieId)
     }
 }
 

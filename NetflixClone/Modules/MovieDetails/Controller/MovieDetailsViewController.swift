@@ -3,7 +3,7 @@ import UIKit
 final class MovieDetailsViewController: UIViewController {
     var onDismiss: (() -> Void)?
     
-    private let movie: Movie
+    private let movieId: Int
     private var similarMovies: [Movie] = [
         Movie(
             id: 1,
@@ -16,6 +16,8 @@ final class MovieDetailsViewController: UIViewController {
             releaseDate: nil
         )
     ]
+    
+    private let movieDetailsViewModel: MovieDetailsViewModel
     
     private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
@@ -116,8 +118,9 @@ final class MovieDetailsViewController: UIViewController {
         return label
     }()
     
-    init(movie: Movie) {
-        self.movie = movie
+    init(movieId: Int, movieDetailsViewModel: MovieDetailsViewModel) {
+        self.movieId = movieId
+        self.movieDetailsViewModel = movieDetailsViewModel
         super.init(nibName: nil, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -131,6 +134,7 @@ final class MovieDetailsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupConstraints()
         configureData()
+        getMovieDetails()
     }
     
     override func viewDidLayoutSubviews() {
@@ -143,6 +147,12 @@ final class MovieDetailsViewController: UIViewController {
         
         if isMovingFromParent || isBeingDismissed {
             onDismiss?()
+        }
+    }
+    
+    private func getMovieDetails() {
+        Task {
+            await movieDetailsViewModel.getMovieDetails(id: movieId)
         }
     }
     

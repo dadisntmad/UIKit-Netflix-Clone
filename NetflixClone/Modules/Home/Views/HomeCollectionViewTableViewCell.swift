@@ -1,7 +1,7 @@
 import UIKit
 
 protocol HomeCollectionViewTableViewCellDelegate: AnyObject {
-    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movie: Movie)
+    func homeCollectionViewTableViewCell(_ cell: HomeCollectionViewTableViewCell, didSelectMovie movieId: Int)
 }
 
 final class HomeCollectionViewTableViewCell: UITableViewCell {
@@ -63,7 +63,6 @@ extension HomeCollectionViewTableViewCell: UICollectionViewDelegate, UICollectio
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        let selectedMovie = movies[indexPath.item]
-        delegate?.homeCollectionViewTableViewCell(self, didSelectMovie: selectedMovie)
+        delegate?.homeCollectionViewTableViewCell(self, didSelectMovie: movies[indexPath.item].id)
     }
 }

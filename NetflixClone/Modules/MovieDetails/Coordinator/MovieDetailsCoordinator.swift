@@ -6,15 +6,25 @@ final class MovieDetailsCoordinator: Coordinator {
     
     var onFinish: (() -> Void)?
     
-    private let movie: Movie
+    private let movieId: Int
+    private let movieService: MovieServiceProtocol
     
-    init(navigationController: UINavigationController, movie: Movie) {
+    init(
+        navigationController: UINavigationController,
+        movieId: Int,
+        movieService: MovieServiceProtocol
+    ) {
         self.navigationController = navigationController
-        self.movie = movie
+        self.movieId = movieId
+        self.movieService = movieService
     }
     
     func start() {
-        let vc = MovieDetailsViewController(movie: movie)
+        let vm = MovieDetailsViewModel(movieService: movieService)
+        let vc = MovieDetailsViewController(
+            movieId: movieId,
+            movieDetailsViewModel: vm
+        )
         
         vc.onDismiss = { [weak self] in
             self?.onFinish?()
