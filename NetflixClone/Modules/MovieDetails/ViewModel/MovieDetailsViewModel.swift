@@ -3,6 +3,7 @@ import Combine
 final class MovieDetailsViewModel {
     @Published private(set) var status: Status = .initial
     @Published private(set) var movie: MovieDetails?
+    @Published private(set) var credits: Credits?
     
     private let movieService: MovieServiceProtocol
     
@@ -16,6 +17,18 @@ final class MovieDetailsViewModel {
         do {
             let res = try await movieService.getMovieDetails(for: id)
             movie = res
+            status = .success
+        } catch {
+            status = .failure
+        }
+    }
+    
+    func getMovieCredits(id: Int) async {
+        status = .initial
+        
+        do {
+            let res = try await movieService.getMovieCredits(for: id)
+            credits = res
             status = .success
         } catch {
             status = .failure

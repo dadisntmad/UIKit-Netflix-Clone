@@ -134,7 +134,6 @@ final class MovieDetailsViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupConstraints()
-        configureData()
         getMovieDetails()
         bindViewModel()
     }
@@ -167,11 +166,35 @@ final class MovieDetailsViewController: UIViewController {
                 self.view.layoutIfNeeded()
             }
             .store(in: &cancellables)
+        
+        movieDetailsViewModel.$credits
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] credits in
+                guard let self = self else { return }
+                
+                self.castSectionView.configure(
+                    prefixText: "Cast",
+                    contentText: credits.cast.map(\.name).joined(separator: ", ")
+                )
+                
+                self.directorSectionView.configure(
+                    prefixText: "Director",
+                    contentText: credits.crew.first(where: { $0.job == "Director" })?.name ?? ""
+                )
+                
+                // Trigger layout pass to update scroll view content size & table view height
+                self.view.setNeedsLayout()
+                self.view.layoutIfNeeded()
+            }
+            .store(in: &cancellables)
     }
     
     private func getMovieDetails() {
         Task {
-            await movieDetailsViewModel.getMovieDetails(id: movieId)
+            async let movieDetails = movieDetailsViewModel.getMovieDetails(id: movieId)
+            async let movieCredits = movieDetailsViewModel.getMovieCredits(id: movieId)
+            _ = await (movieDetails, movieCredits)
         }
     }
     
@@ -269,18 +292,6 @@ final class MovieDetailsViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             tableViewHeightConstraint!
         ])
-    }
-    
-    private func configureData() {
-        castSectionView.configure(
-            prefixText: "Cast",
-            contentText: "Tom Hardy, Emily Browning, Christopher Eccleston, David Thewlis, Taron Egerton, Chazz Palminteri, Colin Morgan, Paul Bettany..."
-        )
-        
-        directorSectionView.configure(
-            prefixText: "Director",
-            contentText: "Brian Helgeland, Quentin Tarantino, Martin Scorsese, Christopher Nolan"
-        )
     }
 }
 
