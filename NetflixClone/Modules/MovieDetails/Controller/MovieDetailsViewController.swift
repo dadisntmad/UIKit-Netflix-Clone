@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 final class MovieDetailsViewController: UIViewController {
     var onDismiss: (() -> Void)?
@@ -18,6 +19,8 @@ final class MovieDetailsViewController: UIViewController {
     ]
     
     private let movieDetailsViewModel: MovieDetailsViewModel
+    
+    private var cancellables = Set<AnyCancellable>()
     
     private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
@@ -71,7 +74,6 @@ final class MovieDetailsViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 24, weight: .semibold)
         label.textColor = .label
-        label.text = "Legend"
         return label
     }()
     
@@ -80,7 +82,7 @@ final class MovieDetailsViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 18, weight: .medium)
         label.textColor = .label
-        label.text = "2015 Crime · Thriller"
+        label.numberOfLines = 0
         return label
     }()
     
@@ -114,7 +116,6 @@ final class MovieDetailsViewController: UIViewController {
         label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textColor = .label
         label.numberOfLines = 0
-        label.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum."
         return label
     }()
     
@@ -135,6 +136,7 @@ final class MovieDetailsViewController: UIViewController {
         setupConstraints()
         configureData()
         getMovieDetails()
+        bindViewModel()
     }
     
     override func viewDidLayoutSubviews() {
@@ -148,6 +150,23 @@ final class MovieDetailsViewController: UIViewController {
         if isMovingFromParent || isBeingDismissed {
             onDismiss?()
         }
+    }
+    
+    private func bindViewModel() {
+        movieDetailsViewModel.$movie
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] movieDetails in
+                guard let self = self else { return }
+                self.movieLabel.text = movieDetails?.title
+                self.movieSubtitleLabel.text = "\(movieDetails?.movieYear ?? "") \(movieDetails?.movieGenre ?? "")"
+                self.movieOverview.text = movieDetails?.overview
+                
+                // Trigger layout pass to update scroll view content size & table view height
+                self.view.setNeedsLayout()
+                self.view.layoutIfNeeded()
+            }
+            .store(in: &cancellables)
     }
     
     private func getMovieDetails() {
