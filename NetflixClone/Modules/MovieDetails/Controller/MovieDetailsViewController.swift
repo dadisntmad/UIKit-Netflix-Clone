@@ -5,18 +5,7 @@ final class MovieDetailsViewController: UIViewController {
     var onDismiss: (() -> Void)?
     
     private let movieId: Int
-    private var similarMovies: [Movie] = [
-        Movie(
-            id: 1,
-            title: "The Krays",
-            voteAverage: 8,
-            backdropPath: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpU4C4QPOuW-hA9BSbd9VbmbQTPzwCW2c-AoZlHj_bmIScglnFo9jT2NY&s=10",
-            genreIds: nil,
-            overview: nil,
-            posterPath: nil,
-            releaseDate: nil
-        )
-    ]
+    private var similarMovies: [Movie] = []
     
     private let movieDetailsViewModel: MovieDetailsViewModel
     
@@ -188,13 +177,27 @@ final class MovieDetailsViewController: UIViewController {
                 self.view.layoutIfNeeded()
             }
             .store(in: &cancellables)
+        
+        movieDetailsViewModel.$similarMovies
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] similarMovies in
+                guard let self = self else { return }
+                self.similarMovies = similarMovies
+                
+                self.tableView.reloadData()
+                // Trigger layout pass to update scroll view content size & table view height
+                self.view.setNeedsLayout()
+                self.view.layoutIfNeeded()
+            }
+            .store(in: &cancellables)
     }
     
     private func getMovieDetails() {
         Task {
             async let movieDetails = movieDetailsViewModel.getMovieDetails(id: movieId)
             async let movieCredits = movieDetailsViewModel.getMovieCredits(id: movieId)
-            _ = await (movieDetails, movieCredits)
+            async let similarMovies = movieDetailsViewModel.getSimilarMovies(id: movieId)
+            _ = await (movieDetails, movieCredits, similarMovies)
         }
     }
     

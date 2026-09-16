@@ -74,7 +74,7 @@ final class SimilarMovieTableViewCell: UITableViewCell {
     
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
-        posterImageView.sd_setImage(with: URL(string: movie.backdropPath ?? ""))
+        posterImageView.sd_setImage(with: URL(string: movie.movieBackdropPath))
     }
     
     @objc private func didTapDownload() {

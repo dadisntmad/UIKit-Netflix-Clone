@@ -6,6 +6,7 @@ protocol MovieServiceProtocol {
     func searchMovie(with query: String) async throws -> MovieResponse
     func getMovieDetails(for id: Int) async throws -> MovieDetails
     func getMovieCredits(for id: Int) async throws -> Credits
+    func getSimilarMovies(for id: Int) async throws -> MovieResponse
 }
 
 final class MovieService: MovieServiceProtocol {
@@ -77,6 +78,18 @@ final class MovieService: MovieServiceProtocol {
     
     func getMovieCredits(for id: Int) async throws -> Credits {
         guard let url = URL(string: "\(baseUrl)/\(id)/credits?api_key=\(AppConfig.shared.apiKey)") else { throw CustomError.invalidUrl }
+        
+        let (data, res) = try await URLSession.shared.data(from: url)
+        
+        do {
+            return try dataResponse(data, res)
+        } catch {
+            throw CustomError.networkError(error)
+        }
+    }
+    
+    func getSimilarMovies(for id: Int) async throws -> MovieResponse {
+        guard let url = URL(string: "\(baseUrl)/\(id)/similar?api_key=\(AppConfig.shared.apiKey)") else { throw CustomError.invalidUrl }
         
         let (data, res) = try await URLSession.shared.data(from: url)
         

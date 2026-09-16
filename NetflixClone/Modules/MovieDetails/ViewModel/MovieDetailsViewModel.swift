@@ -4,6 +4,7 @@ final class MovieDetailsViewModel {
     @Published private(set) var status: Status = .initial
     @Published private(set) var movie: MovieDetails?
     @Published private(set) var credits: Credits?
+    @Published private(set) var similarMovies: [Movie] = []
     
     private let movieService: MovieServiceProtocol
     
@@ -29,6 +30,18 @@ final class MovieDetailsViewModel {
         do {
             let res = try await movieService.getMovieCredits(for: id)
             credits = res
+            status = .success
+        } catch {
+            status = .failure
+        }
+    }
+    
+    func getSimilarMovies(id: Int) async {
+        status = .loading
+        
+        do {
+            let res = try await movieService.getSimilarMovies(for: id)
+            similarMovies = res.results
             status = .success
         } catch {
             status = .failure
