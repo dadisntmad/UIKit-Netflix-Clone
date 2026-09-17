@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		44C1DC1E305C457200C3B3F6 /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 44C1DC1D305C457200C3B3F6 /* YouTubePlayerKit */; };
 		44DCDF7E30360F8500363DB1 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 44DCDF7D30360F8500363DB1 /* SDWebImage */; };
 		44DCDF8030360F8500363DB1 /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 44DCDF7F30360F8500363DB1 /* SDWebImageMapKit */; };
 /* End PBXBuildFile section */
@@ -19,6 +20,7 @@
 		44F04D60302A29CD000E235E /* Exceptions for "NetflixClone" folder in "NetflixClone" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Config/Cfg.xcconfig,
 				Info.plist,
 			);
 			target = 44F04D4D302A29CC000E235E /* NetflixClone */;
@@ -43,6 +45,7 @@
 			files = (
 				44DCDF8030360F8500363DB1 /* SDWebImageMapKit in Frameworks */,
 				44DCDF7E30360F8500363DB1 /* SDWebImage in Frameworks */,
+				44C1DC1E305C457200C3B3F6 /* YouTubePlayerKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +90,7 @@
 			packageProductDependencies = (
 				44DCDF7D30360F8500363DB1 /* SDWebImage */,
 				44DCDF7F30360F8500363DB1 /* SDWebImageMapKit */,
+				44C1DC1D305C457200C3B3F6 /* YouTubePlayerKit */,
 			);
 			productName = NetflixClone;
 			productReference = 44F04D4E302A29CC000E235E /* NetflixClone.app */;
@@ -100,7 +104,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2660;
-				LastUpgradeCheck = 2660;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					44F04D4D302A29CC000E235E = {
 						CreatedOnToolsVersion = 26.6;
@@ -118,6 +122,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				44DCDF7C30360F8500363DB1 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				44C1DC1C305C457200C3B3F6 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 44F04D4F302A29CC000E235E /* Products */;
@@ -279,6 +284,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -338,6 +344,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -367,6 +374,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		44C1DC1C305C457200C3B3F6 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.5;
+			};
+		};
 		44DCDF7C30360F8500363DB1 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
@@ -378,6 +393,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		44C1DC1D305C457200C3B3F6 /* YouTubePlayerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44C1DC1C305C457200C3B3F6 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
+			productName = YouTubePlayerKit;
+		};
 		44DCDF7D30360F8500363DB1 /* SDWebImage */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 44DCDF7C30360F8500363DB1 /* XCRemoteSwiftPackageReference "SDWebImage" */;

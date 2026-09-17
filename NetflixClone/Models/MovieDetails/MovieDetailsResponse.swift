@@ -17,6 +17,10 @@ struct MovieDetails: Codable {
         releaseDate.split(separator: "-").first?.description ?? "Unknown Release Year"
     }
     
+    var youtubeVideos: [VideoResult] {
+        videos.results.filter({ $0.site == "YouTube" && $0.type == "Trailer" })
+    }
+    
     enum CodingKeys: String, CodingKey {
         case adult
         case backdropPath = "backdrop_path"
@@ -43,8 +47,5 @@ struct VideoResult: Codable {
     let key: String
     let site: String
     let id: String
-    
-    var isYouTube: Bool {
-        site == "YouTube"
-    }
+    let type: String
 }

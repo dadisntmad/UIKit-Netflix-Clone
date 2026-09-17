@@ -1,11 +1,15 @@
 import UIKit
 import Combine
+import YouTubePlayerKit
 
 final class MovieDetailsViewController: UIViewController {
+    private var playerViewController: YouTubePlayerViewController?
+    
     var onDismiss: (() -> Void)?
     
     private let movieId: Int
     private var similarMovies: [Movie] = []
+    private var youtubeVideoId: String?
     
     private let movieDetailsViewModel: MovieDetailsViewModel
     
@@ -51,11 +55,11 @@ final class MovieDetailsViewController: UIViewController {
         return view
     }()
     
-    private let videoPlaceholder: UIView = {
-        let uiView = UIView()
-        uiView.translatesAutoresizingMaskIntoConstraints = false
-        uiView.backgroundColor = .systemGray
-        return uiView
+    private let playerContainerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .black
+        return view
     }()
     
     private let movieLabel: UILabel = {
@@ -146,9 +150,13 @@ final class MovieDetailsViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] movieDetails in
                 guard let self = self else { return }
-                self.movieLabel.text = movieDetails?.title
-                self.movieSubtitleLabel.text = "\(movieDetails?.movieYear ?? "") \(movieDetails?.movieGenre ?? "")"
-                self.movieOverview.text = movieDetails?.overview
+                self.movieLabel.text = movieDetails.title
+                self.movieSubtitleLabel.text = "\(movieDetails.movieYear) \(movieDetails.movieGenre)"
+                self.movieOverview.text = movieDetails.overview
+                
+                if let videoKey = movieDetails.youtubeVideos.first?.key, !videoKey.isEmpty {
+                    self.loadYoutubePlayer(videoId: videoKey)
+                }
                 
                 // Trigger layout pass to update scroll view content size & table view height
                 self.view.setNeedsLayout()
@@ -201,12 +209,49 @@ final class MovieDetailsViewController: UIViewController {
         }
     }
     
+    private func loadYoutubePlayer(videoId: String) {
+        // If player already exists, reload with the new video ID
+        guard playerViewController == nil else {
+            Task {
+                try? await playerViewController?.player.load(source: .video(id: videoId))
+            }
+            return
+        }
+        
+        let player = YouTubePlayer(
+            source: .video(id: videoId),
+            parameters: .init(
+                autoPlay: false,
+                showControls: true,
+            ),
+            configuration: .init(
+                fullscreenMode: .system,
+            )
+        )
+        
+        let playerVC = YouTubePlayerViewController(player: player)
+        
+        addChild(playerVC)
+        playerContainerView.addSubview(playerVC.view)
+        playerVC.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            playerVC.view.topAnchor.constraint(equalTo: playerContainerView.topAnchor),
+            playerVC.view.leadingAnchor.constraint(equalTo: playerContainerView.leadingAnchor),
+            playerVC.view.trailingAnchor.constraint(equalTo: playerContainerView.trailingAnchor),
+            playerVC.view.bottomAnchor.constraint(equalTo: playerContainerView.bottomAnchor)
+        ])
+        
+        playerVC.didMove(toParent: self)
+        self.playerViewController = playerVC
+    }
+    
     private func setupConstraints() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
         [
-            videoPlaceholder,
+            playerContainerView,
             movieLabel,
             movieSubtitleLabel,
             playButton,
@@ -236,13 +281,13 @@ final class MovieDetailsViewController: UIViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
             
             // Video player
-            videoPlaceholder.topAnchor.constraint(equalTo: contentView.topAnchor),
-            videoPlaceholder.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            videoPlaceholder.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            videoPlaceholder.heightAnchor.constraint(equalToConstant: 250),
+            playerContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            playerContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            playerContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            playerContainerView.heightAnchor.constraint(equalToConstant: 250),
             
             // Movie label
-            movieLabel.topAnchor.constraint(equalTo: videoPlaceholder.bottomAnchor, constant: 16),
+            movieLabel.topAnchor.constraint(equalTo: playerContainerView.bottomAnchor, constant: 16),
             movieLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             movieLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
