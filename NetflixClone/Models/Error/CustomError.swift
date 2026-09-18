@@ -6,6 +6,7 @@ enum CustomError: Error, LocalizedError {
     case httpError(statusCode: Int)
     case networkError(Error)
     case noSessionId
+    case noAccountId
     
     var errorDescription: String? {
         switch self {
@@ -14,6 +15,7 @@ enum CustomError: Error, LocalizedError {
         case .httpError(let code): return "HTTP Server error code: \(code)."
         case .networkError(let err): return err.localizedDescription
         case .noSessionId: return "No session ID available."
+        case .noAccountId: return "No account ID available."
         }
     }
 }

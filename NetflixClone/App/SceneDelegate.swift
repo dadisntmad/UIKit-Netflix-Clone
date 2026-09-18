@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window: window,
             authService: AuthService(),
             keychainService: keychainService,
-            movieService: MovieService(),
+            movieService: MovieService(keychainService: keychainService),
             userService: UserService(keychainService: keychainService)
         )
         

@@ -5,6 +5,7 @@ final class MovieDetailsViewModel {
     @Published private(set) var movie: MovieDetails?
     @Published private(set) var credits: Credits?
     @Published private(set) var similarMovies: [Movie] = []
+    @Published private(set) var isFavorite = false
     
     private let movieService: MovieServiceProtocol
     
@@ -44,6 +45,19 @@ final class MovieDetailsViewModel {
             similarMovies = res.results
             status = .success
         } catch {
+            status = .failure
+        }
+    }
+    
+    func markMovieAsFavorite(id: Int) async {
+        status = .loading
+        
+        do {
+            isFavorite.toggle()
+            try await movieService.markAsFavorite(for: id, isFavorite: isFavorite)
+            status = .success
+        } catch {
+            isFavorite = false
             status = .failure
         }
     }

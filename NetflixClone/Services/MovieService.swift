@@ -7,10 +7,18 @@ protocol MovieServiceProtocol {
     func getMovieDetails(for id: Int) async throws -> MovieDetails
     func getMovieCredits(for id: Int) async throws -> Credits
     func getSimilarMovies(for id: Int) async throws -> MovieResponse
+    func markAsFavorite(for id: Int, isFavorite: Bool) async throws
 }
 
 final class MovieService: MovieServiceProtocol {
     private let baseUrl = "https://api.themoviedb.org/3/movie"
+    private let accountBaseUrl = "https://api.themoviedb.org/3/account"
+    
+    private let keychainService: KeychainServiceProtocol
+    
+    init(keychainService: KeychainServiceProtocol) {
+        self.keychainService = keychainService
+    }
     
     func getMovies(for type: MovieType) async throws -> MovieResponse {
         guard let url = URL(string: "\(baseUrl)/\(type.endpoint)?api_key=\(AppConfig.shared.apiKey)") else {
@@ -98,6 +106,40 @@ final class MovieService: MovieServiceProtocol {
         } catch {
             throw CustomError.networkError(error)
         }
+    }
+    
+    func markAsFavorite(for id: Int, isFavorite: Bool) async throws {
+        guard let sessionId = await keychainService.load(forKey: AppConstants.sessionId) else {
+            throw CustomError.noSessionId
+        }
+        
+        guard let accountId = await keychainService.load(forKey: AppConstants.accountId) else {
+            throw CustomError.noAccountId
+        }
+        
+        let urlString = "\(accountBaseUrl)/\(accountId)/favorite?api_key=\(AppConfig.shared.apiKey)&session_id=\(sessionId)"
+        
+        guard let url = URL(string: urlString) else {
+            throw CustomError.invalidUrl
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "media_type": "movie",
+            "media_id": id,
+            "favorite": isFavorite
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            debugPrint("HTTP Status Code: \(httpResponse.statusCode)")
+        }
+        debugPrint("Response Body: \(String(data: data, encoding: .utf8) ?? "No data")")
     }
     
     // MARK: Helpers

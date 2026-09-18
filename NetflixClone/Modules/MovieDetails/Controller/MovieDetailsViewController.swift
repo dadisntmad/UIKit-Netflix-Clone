@@ -129,6 +129,7 @@ final class MovieDetailsViewController: UIViewController {
         setupConstraints()
         getMovieDetails()
         bindViewModel()
+        handleMovieActions()
     }
     
     override func viewDidLayoutSubviews() {
@@ -244,6 +245,15 @@ final class MovieDetailsViewController: UIViewController {
         
         playerVC.didMove(toParent: self)
         self.playerViewController = playerVC
+    }
+    
+    private func handleMovieActions() {
+        actionButtonsView.onMyListTapped = { [weak self] in
+            guard let self = self else { return }
+            Task {
+                await self.movieDetailsViewModel.markMovieAsFavorite(id: self.movieId)
+            }
+        }
     }
     
     private func setupConstraints() {
