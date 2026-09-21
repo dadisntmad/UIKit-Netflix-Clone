@@ -6,6 +6,12 @@ final class MovieActionButtonsView: UIStackView {
     var onRateTapped: (() -> Void)?
     var onShareTapped: (() -> Void)?
     
+    var isFavorite: Bool {
+        didSet {
+            updateMyListButton()
+        }
+    }
+    
     private lazy var myListButton: UIButton = makeActionButton(
         title: "My List",
         systemImageName: Icon.systemPlus
@@ -21,9 +27,11 @@ final class MovieActionButtonsView: UIStackView {
         systemImageName: Icon.systemShare
     )
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, isFavorite: Bool = false) {
+        self.isFavorite = isFavorite
         super.init(frame: frame)
         setupView()
+        updateMyListButton()
     }
     
     required init(coder: NSCoder) {
@@ -65,6 +73,15 @@ final class MovieActionButtonsView: UIStackView {
         let button = UIButton(configuration: config)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }
+    
+    private func updateMyListButton() {
+        let imageName = isFavorite ? Icon.systemCheckmark : Icon.systemPlus
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 22, weight: .regular)
+        
+        var config = myListButton.configuration
+        config?.image = UIImage(systemName: imageName, withConfiguration: imageConfig)
+        myListButton.configuration = config
     }
     
     @objc private func didTapMyList() { onMyListTapped?() }

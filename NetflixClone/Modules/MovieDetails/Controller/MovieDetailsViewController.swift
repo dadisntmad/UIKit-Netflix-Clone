@@ -10,14 +10,13 @@ final class MovieDetailsViewController: UIViewController {
     private let movieId: Int
     private var similarMovies: [Movie] = []
     private var youtubeVideoId: String?
-    
     private let movieDetailsViewModel: MovieDetailsViewModel
     
     private var cancellables = Set<AnyCancellable>()
     
     private let castSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
     private let directorSectionView = ExpandableTextStackView(collapsedNumberOfLines: 1)
-    private let actionButtonsView = MovieActionButtonsView()
+    private let actionButtonsView = MovieActionButtonsView(frame: .zero)
     
     private var tableViewHeightConstraint: NSLayoutConstraint?
     
@@ -158,15 +157,11 @@ final class MovieDetailsViewController: UIViewController {
                 if let videoKey = movieDetails.youtubeVideos.first?.key, !videoKey.isEmpty {
                     self.loadYoutubePlayer(videoId: videoKey)
                 }
-                
-                // Trigger layout pass to update scroll view content size & table view height
-                self.view.setNeedsLayout()
-                self.view.layoutIfNeeded()
             }
             .store(in: &cancellables)
         
         movieDetailsViewModel.$credits
-            .compactMap(\.self)
+            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] credits in
                 guard let self = self else { return }
@@ -180,10 +175,6 @@ final class MovieDetailsViewController: UIViewController {
                     prefixText: "Director",
                     contentText: credits.crew.first(where: { $0.job == "Director" })?.name ?? ""
                 )
-                
-                // Trigger layout pass to update scroll view content size & table view height
-                self.view.setNeedsLayout()
-                self.view.layoutIfNeeded()
             }
             .store(in: &cancellables)
         
@@ -192,21 +183,26 @@ final class MovieDetailsViewController: UIViewController {
             .sink { [weak self] similarMovies in
                 guard let self = self else { return }
                 self.similarMovies = similarMovies
-                
                 self.tableView.reloadData()
-                // Trigger layout pass to update scroll view content size & table view height
+                
+                // Re-evaluate table height constraint and schedule layout for next frame
+                self.tableViewHeightConstraint?.constant = self.tableView.contentSize.height
                 self.view.setNeedsLayout()
-                self.view.layoutIfNeeded()
+            }
+            .store(in: &cancellables)
+        
+        movieDetailsViewModel.$isFavorite
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isFavorite in
+                guard let self = self else { return }
+                self.actionButtonsView.isFavorite = isFavorite
             }
             .store(in: &cancellables)
     }
     
     private func getMovieDetails() {
         Task {
-            async let movieDetails = movieDetailsViewModel.getMovieDetails(id: movieId)
-            async let movieCredits = movieDetailsViewModel.getMovieCredits(id: movieId)
-            async let similarMovies = movieDetailsViewModel.getSimilarMovies(id: movieId)
-            _ = await (movieDetails, movieCredits, similarMovies)
+            await movieDetailsViewModel.fetchAllData(id: movieId)
         }
     }
     

@@ -1,6 +1,10 @@
 import Combine
 
-final class MovieDetailsViewModel {
+import Foundation
+import Combine
+
+@MainActor
+final class MovieDetailsViewModel: ObservableObject {
     @Published private(set) var status: Status = .initial
     @Published private(set) var movie: MovieDetails?
     @Published private(set) var credits: Credits?
@@ -13,36 +17,24 @@ final class MovieDetailsViewModel {
         self.movieService = movieService
     }
     
-    func getMovieDetails(id: Int) async {
+    func fetchAllData(id: Int) async {
         status = .loading
         
         do {
-            let res = try await movieService.getMovieDetails(for: id)
-            movie = res
-            status = .success
-        } catch {
-            status = .failure
-        }
-    }
-    
-    func getMovieCredits(id: Int) async {
-        status = .initial
-        
-        do {
-            let res = try await movieService.getMovieCredits(for: id)
-            credits = res
-            status = .success
-        } catch {
-            status = .failure
-        }
-    }
-    
-    func getSimilarMovies(id: Int) async {
-        status = .loading
-        
-        do {
-            let res = try await movieService.getSimilarMovies(for: id)
-            similarMovies = res.results
+            async let movieFetch = movieService.getMovieDetails(for: id)
+            async let creditsFetch = movieService.getMovieCredits(for: id)
+            async let similarFetch = movieService.getSimilarMovies(for: id)
+            async let favoriteFetch = movieService.checkFavoriteMovie(for: id)
+            
+            let (movieRes, creditsRes, similarRes, favoriteRes) = try await (
+                movieFetch, creditsFetch, similarFetch, favoriteFetch
+            )
+            
+            self.movie = movieRes
+            self.credits = creditsRes
+            self.similarMovies = similarRes.results
+            self.isFavorite = favoriteRes.favorite
+            
             status = .success
         } catch {
             status = .failure
@@ -50,14 +42,13 @@ final class MovieDetailsViewModel {
     }
     
     func markMovieAsFavorite(id: Int) async {
-        status = .loading
+        let previousState = isFavorite
+        isFavorite.toggle()
         
         do {
-            isFavorite.toggle()
             try await movieService.markAsFavorite(for: id, isFavorite: isFavorite)
-            status = .success
         } catch {
-            isFavorite = false
+            isFavorite = previousState // Roll back to previous state on failure
             status = .failure
         }
     }
