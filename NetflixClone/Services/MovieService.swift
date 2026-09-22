@@ -9,6 +9,7 @@ protocol MovieServiceProtocol {
     func getSimilarMovies(for id: Int) async throws -> MovieResponse
     func markAsFavorite(for id: Int, isFavorite: Bool) async throws
     func checkFavoriteMovie(for id: Int) async throws -> AccountStates
+    func getFavoriteMovies() async throws -> MovieResponse
 }
 
 final class MovieService: MovieServiceProtocol {
@@ -149,6 +150,28 @@ final class MovieService: MovieServiceProtocol {
         }
         
         guard let url = URL(string: "\(baseUrl)/\(id)/account_states?session_id=\(sessionId)&api_key=\(AppConfig.shared.apiKey)") else {
+            throw CustomError.invalidUrl
+        }
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        do {
+            return try dataResponse(data, response)
+        } catch {
+            throw CustomError.networkError(error)
+        }
+    }
+    
+    func getFavoriteMovies() async throws -> MovieResponse {
+        guard let accountId = await keychainService.load(forKey: AppConstants.accountId) else {
+            throw CustomError.noAccountId
+        }
+        
+        guard let sessionId = await keychainService.load(forKey: AppConstants.sessionId) else {
+            throw CustomError.noSessionId
+        }
+        
+        guard let url = URL(string: "\(accountBaseUrl)/\(accountId)/favorite/movies?session_id=\(sessionId)&api_key=\(AppConfig.shared.apiKey)") else {
             throw CustomError.invalidUrl
         }
         

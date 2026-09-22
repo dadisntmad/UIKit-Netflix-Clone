@@ -46,7 +46,10 @@ final class MainCoordinator: Coordinator {
         newAndHotNav.tabBarItem = UITabBarItem(title: "New & Hot", image: UIImage(named: Icon.new), tag: 1)
         
         let favoritesNav = UINavigationController()
-        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav)
+        let favoritesCoordinator = FavoritesCoordinator(
+            navigationController: favoritesNav,
+            movieService: movieService
+        )
         addChild(favoritesCoordinator)
         favoritesCoordinator.start()
         favoritesNav.tabBarItem = UITabBarItem(title: "More", image: UIImage(named: Icon.more), tag: 2)
