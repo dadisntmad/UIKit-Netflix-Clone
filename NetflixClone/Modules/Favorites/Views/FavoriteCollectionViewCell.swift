@@ -4,6 +4,9 @@ import SDWebImage
 final class FavoriteCollectionViewCell: UICollectionViewCell {
     static let identifier = "FavoriteCollectionViewCell"
     
+    var onUnmark: (() -> Void)?
+    private var isFavorite = true
+    
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -24,7 +27,6 @@ final class FavoriteCollectionViewCell: UICollectionViewCell {
         var configuration = UIButton.Configuration.plain()
         configuration.baseForegroundColor = .accentRed
         configuration.contentInsets = .zero
-        configuration.image = UIImage(systemName: Icon.systemHeartFill)
         let btn = UIButton(configuration: configuration)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.contentHorizontalAlignment = .leading
@@ -34,15 +36,41 @@ final class FavoriteCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupConstraints()
+        likeButton.addTarget(self, action: #selector(handleFavoriteTap), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        onUnmark = nil
+        isFavorite = true
+        updateButtonIcon()
+    }
+    
     func configure(with movie: Movie) {
         posterImageView.sd_setImage(with: URL(string: movie.moviePosterPath), completed: nil)
         movieLabel.text = movie.title
+        
+        // Reset state and update icon without calling handleFavoriteTap()
+        isFavorite = true
+        updateButtonIcon()
+    }
+    
+    @objc private func handleFavoriteTap() {
+        isFavorite.toggle()
+        updateButtonIcon()
+        
+        if !isFavorite {
+            onUnmark?()
+        }
+    }
+    
+    private func updateButtonIcon() {
+        let systemName = isFavorite ? Icon.systemHeartFill : Icon.systemHeart
+        likeButton.configuration?.image = UIImage(systemName: systemName)
     }
     
     private func setupConstraints() {

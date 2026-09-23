@@ -70,7 +70,26 @@ extension FavoritesViewController: UICollectionViewDelegate, UICollectionViewDat
             return UICollectionViewCell()
         }
         
-        cell.configure(with: viewModel.favoriteMovies[indexPath.item])
+        let movie = viewModel.favoriteMovies[indexPath.item]
+        
+        cell.onUnmark = { [weak self, weak collectionView] in
+            guard let self = self, let collectionView = collectionView else { return }
+            
+            Task {
+                await self.viewModel.unmarkMovieAsFavorite(for: movie.id)
+                
+                // Refresh data and remove deleted item from collection view UI
+                await MainActor.run {
+                    if let currentIndexPath = collectionView.indexPath(for: cell) {
+                        collectionView.deleteItems(at: [currentIndexPath])
+                    } else {
+                        collectionView.reloadData()
+                    }
+                }
+            }
+        }
+        
+        cell.configure(with: movie)
         
         return cell
     }

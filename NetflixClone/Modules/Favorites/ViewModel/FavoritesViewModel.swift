@@ -22,4 +22,16 @@ final class FavoritesViewModel {
             status = .failure
         }
     }
+    
+    func unmarkMovieAsFavorite(for id: Int) async {
+        status = .loading
+        
+        do {
+            try await movieService.markAsFavorite(for: id, isFavorite: false)
+            favoriteMovies.removeAll { $0.id == id }
+            status = .success
+        } catch {
+            status = .failure
+        }
+    }
 }
