@@ -25,4 +25,6 @@ enum Icon {
     static let systemThumbsUpFill = "hand.thumbsup.fill"
     static let systemShare = "square.and.arrow.up"
     static let systemDownSquare = "arrow.down.square"
+    static let systemHeart = "heart"
+    static let systemHeartFill = "heart.fill"
 }
