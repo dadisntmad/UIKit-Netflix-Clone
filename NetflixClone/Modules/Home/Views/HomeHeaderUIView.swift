@@ -13,6 +13,8 @@ final class HomeHeaderUIView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 28, weight: .semibold)
+        label.textAlignment = .center
+        label.numberOfLines = 2
         return label
     }()
     
@@ -81,6 +83,8 @@ final class HomeHeaderUIView: UIView {
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             // Movie label
+            movieLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            movieLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             movieLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
             movieLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             
