@@ -1,6 +1,9 @@
 import UIKit
+import Combine
 
 final class FavoritesViewController: UIViewController {
+    private var cancellables = Set<AnyCancellable>()
+    
     private let viewModel: FavoritesViewModel
     
     private let layout: UICollectionViewFlowLayout = {
@@ -21,6 +24,8 @@ final class FavoritesViewController: UIViewController {
         return collection
     }()
     
+    private let emptyView = EmptyView()
+    
     init(viewModel: FavoritesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -35,8 +40,10 @@ final class FavoritesViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Favorite Movies"
         view.addSubview(collectionView)
+        collectionView.backgroundView = emptyView
         collectionView.delegate = self
         collectionView.dataSource = self
+        bindViewModel()
         getFavoriteMovies()
     }
     
@@ -50,13 +57,42 @@ final class FavoritesViewController: UIViewController {
         layout.itemSize = CGSize(width: width, height: width * 1.75)
     }
     
+    private func bindViewModel() {
+        viewModel.$favoriteMovies
+            .receive(on: RunLoop.main)
+            .sink { [weak self] favoriteMovies in
+                guard let self = self else { return }
+                self.collectionView.reloadData()
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$status
+            .receive(on: RunLoop.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                
+                switch status {
+                case .loading:
+                    self.emptyView.isHidden = true
+                    
+                case .success, .failure, .initial:
+                    self.updateEmptyState()
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     private func getFavoriteMovies() {
         Task {
             await viewModel.getFavoriteMovies()
-            await MainActor.run {
-                self.collectionView.reloadData()
-            }
         }
+    }
+    
+    private func updateEmptyState() {
+        let isEmpty = viewModel.favoriteMovies.isEmpty
+        let isLoading = viewModel.status == .loading
+        
+        emptyView.isHidden = isLoading || !isEmpty
     }
 }
 
@@ -81,9 +117,14 @@ extension FavoritesViewController: UICollectionViewDelegate, UICollectionViewDat
                 // Refresh data and remove deleted item from collection view UI
                 await MainActor.run {
                     if let currentIndexPath = collectionView.indexPath(for: cell) {
-                        collectionView.deleteItems(at: [currentIndexPath])
+                        collectionView.performBatchUpdates {
+                            collectionView.deleteItems(at: [currentIndexPath])
+                        } completion: { _ in
+                            self.updateEmptyState()
+                        }
                     } else {
                         collectionView.reloadData()
+                        self.updateEmptyState()
                     }
                 }
             }
